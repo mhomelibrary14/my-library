@@ -10,10 +10,8 @@
 
   <title>MY LIBRARY</title>
 
-  <!-- バーコード読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"
           type="text/javascript"></script>
-
 
   <style>
 
@@ -25,19 +23,16 @@
       color: #333;
     }
 
-
     h1 {
       text-align: center;
       margin: 10px 0 5px;
     }
-
 
     .subtitle {
       text-align: center;
       color: #777;
       margin-bottom: 25px;
     }
-
 
     #reader {
       width: 100%;
@@ -48,79 +43,39 @@
       overflow: hidden;
     }
 
-
-    /* スキャン開始ボタン */
-
-    #startButton {
-
+    button {
       display: block;
-
       width: 100%;
-
       max-width: 500px;
-
       margin: 20px auto;
-
       padding: 16px;
-
       border: none;
-
       border-radius: 12px;
-
       font-size: 18px;
-
       background: #333;
-
       color: white;
-
     }
-
-
-    #startButton:active {
-
-      background: #555;
-
-    }
-
-
-    /* 読み取り結果 */
 
     #result {
-
       max-width: 500px;
-
       margin: 20px auto;
-
       padding: 20px;
-
       background: white;
-
       border-radius: 16px;
-
       box-sizing: border-box;
-
+      display: none;
     }
 
-
-    .success {
-
-      font-size: 20px;
-
+    .title {
+      font-size: 21px;
       font-weight: bold;
-
       margin-bottom: 10px;
-
     }
 
-
-    .isbn {
-
-      font-size: 18px;
-
+    .info {
+      line-height: 1.8;
       color: #555;
-
     }
-
 
   </style>
 
@@ -129,21 +84,15 @@
 
 <body>
 
-
   <h1>📚 MY LIBRARY</h1>
-
 
   <div class="subtitle">
     本のバーコードをスキャン
   </div>
 
 
-  <!-- カメラ表示エリア -->
-
   <div id="reader"></div>
 
-
-  <!-- カメラ起動ボタン -->
 
   <button id="startButton"
           onclick="startScanner()">
@@ -153,17 +102,14 @@
   </button>
 
 
-  <!-- 読み取り結果 -->
-
   <div id="result">
 
-    <div class="success">
-      ✅ 読み取り成功！
+    <div class="title"
+         id="title">
     </div>
 
-    <div class="isbn"
-         id="isbnResult">
-
+    <div class="info"
+         id="info">
     </div>
 
   </div>
@@ -172,15 +118,28 @@
 <script>
 
 
+  // =====================================
+  // Apps ScriptのURL
+  // =====================================
+
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
+
+
   let scanner = null;
 
   let scanned = false;
 
 
+  // =====================================
+  // スキャン開始
+  // =====================================
+
   function startScanner() {
 
 
-    /* すでに起動していた場合 */
+    scanned = false;
+
 
     if (scanner) {
 
@@ -195,22 +154,13 @@
     }
 
 
-    scanned = false;
+    document.getElementById("result")
+      .style.display = "none";
 
-
-    /* 結果を消す */
-
-    document.getElementById("result").style.display =
-      "none";
-
-
-    /* スキャナー作成 */
 
     scanner =
       new Html5Qrcode("reader");
 
-
-    /* バーコード設定 */
 
     const config = {
 
@@ -233,20 +183,18 @@
     };
 
 
-    /* カメラ起動 */
-
     scanner.start(
 
       {
-
         facingMode: "environment"
-
       },
 
       config,
 
 
-      /* 読み取り成功 */
+      // =================================
+      // バーコード読み取り成功
+      // =================================
 
       function(decodedText) {
 
@@ -261,60 +209,149 @@
         scanned = true;
 
 
-        /* ISBN取得 */
-
         const isbn =
           decodedText.replace(/[^0-9]/g, "");
 
 
-        /* 結果表示 */
-
-        document.getElementById(
-          "result"
-        ).style.display = "block";
-
-
-        document.getElementById(
-          "isbnResult"
-        ).textContent =
-          "ISBN：" + isbn;
-
-
-        /* カメラ停止 */
+        // カメラ停止
 
         scanner.stop().catch(function() {});
 
 
+        // 登録処理開始
+
+        sendISBN(isbn);
+
       },
 
 
-      /* 読み取り失敗 */
-
       function(errorMessage) {
 
-        /* 何もしない */
+        // 読み取り失敗は無視
 
       }
 
     )
 
 
-    /* カメラ起動エラー */
+    .catch(function(error) {
+
+      alert(
+        "カメラを起動できませんでした。\n\n" +
+        error
+      );
+
+    });
+
+  }
+
+
+  // =====================================
+  // Apps ScriptへISBN送信
+  // =====================================
+
+  function sendISBN(isbn) {
+
+
+    document.getElementById("result")
+      .style.display = "block";
+
+
+    document.getElementById("title")
+      .textContent = "⏳ 書籍情報を取得しています";
+
+
+    document.getElementById("info")
+      .textContent =
+        "ISBN：" + isbn;
+
+
+    fetch(API_URL, {
+
+      method: "POST",
+
+      headers: {
+
+        "Content-Type": "text/plain;charset=utf-8"
+
+      },
+
+      body: JSON.stringify({
+
+        code: isbn
+
+      })
+
+    })
+
+
+    .then(function(response) {
+
+      return response.json();
+
+    })
+
+
+    .then(function(result) {
+
+
+      if (result.success) {
+
+
+        document.getElementById("title")
+          .textContent =
+          "✅ " + result.title;
+
+
+        document.getElementById("info")
+          .innerHTML =
+
+          "ISBN：" + result.isbn +
+
+          "<br>" +
+
+          "著者：" + result.author +
+
+          "<br>" +
+
+          "出版社：" + result.publisher +
+
+          "<br><br>" +
+
+          "📚 蔵書に登録しました！";
+
+
+      } else {
+
+
+        document.getElementById("title")
+          .textContent =
+          "⚠️ 登録できませんでした";
+
+
+        document.getElementById("info")
+          .textContent =
+          result.message;
+
+      }
+
+    })
+
 
     .catch(function(error) {
 
 
-      alert(
+      document.getElementById("title")
+        .textContent =
+        "❌ 通信エラー";
 
-        "カメラを起動できませんでした。\n\n" +
 
-        error
-
-      );
+      document.getElementById("info")
+        .textContent =
+        error.toString();
 
 
     });
-
 
   }
 
