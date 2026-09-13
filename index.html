@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
   <title>MY LIBRARY</title>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
+
     body {
       font-family: sans-serif;
       text-align: center;
@@ -33,37 +38,82 @@
       background: white;
       border-radius: 10px;
     }
+
   </style>
+
 </head>
+
 
 <body>
 
 <h1>📚 MY LIBRARY</h1>
 
+
 <div id="reader"></div>
 
+
 <div id="result">
-  <div id="title">バーコードを読み取ってください</div>
+
+  <div id="title">
+    バーコードを読み取ってください
+  </div>
+
   <div id="info"></div>
+
 </div>
 
+
+<!-- Apps Scriptへの送信用 -->
+
+<iframe
+  name="librarySubmit"
+  id="librarySubmit"
+  style="display:none;">
+</iframe>
+
+
+<form
+  id="libraryForm"
+  method="POST"
+  target="librarySubmit"
+  style="display:none;">
+
+  <input
+    type="hidden"
+    name="code"
+    id="isbnInput">
+
+</form>
+
+
 <script>
+
 
 const API_URL =
   "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
 
 
 let scanner = null;
+
 let scanning = false;
 
+
+/* -------------------------
+   画面表示
+------------------------- */
 
 function showResult(title, info) {
 
   document.getElementById("title").textContent = title;
+
   document.getElementById("info").innerHTML = info;
 
 }
 
+
+/* -------------------------
+   Apps Scriptへ送信
+------------------------- */
 
 function sendISBN(isbn) {
 
@@ -73,58 +123,40 @@ function sendISBN(isbn) {
   );
 
 
+  document.getElementById("isbnInput").value = isbn;
+
+
+  document.getElementById("libraryForm").action =
+    API_URL;
+
+
+  document.getElementById("libraryForm").submit();
+
+
   /*
-   * JSONPではなく、
-   * 画像読み込みを利用してApps Scriptへアクセスします。
+   * フォーム送信はブラウザの標準機能なので、
+   * CORSの影響を受けません。
    *
-   * iPhoneでも動作しやすい方式です。
+   * 少し待ってから登録完了画面を表示します。
    */
 
-  const request = new Image();
-
-  request.onload = function() {
+  setTimeout(function() {
 
     showResult(
-      "✅ 登録処理を送信しました！",
+      "📚 登録処理を実行しました",
       "ISBN：" + isbn +
-      "<br><br>📚 蔵書への登録を確認してください。"
+      "<br><br>" +
+      "蔵書シートを確認してください。"
     );
 
-  };
-
-
-  request.onerror = function() {
-
-    /*
-     * Apps Scriptからのレスポンス形式によっては
-     * onerrorになる場合があります。
-     *
-     * リクエスト自体は送信されている可能性があるため、
-     * 少し待ってから確認画面を表示します。
-     */
-
-    setTimeout(function() {
-
-      showResult(
-        "📚 登録処理を実行しました",
-        "ISBN：" + isbn +
-        "<br><br>蔵書シートを確認してください。"
-      );
-
-    }, 1500);
-
-  };
-
-
-  request.src =
-    API_URL +
-    "?code=" +
-    encodeURIComponent(isbn) +
-    "&t=" +
-    Date.now();
+  }, 1500);
 
 }
 
+
+/* -------------------------
+   バーコード読み取り成功
+------------------------- */
 
 function onScanSuccess(decodedText) {
 
@@ -132,43 +164,79 @@ function onScanSuccess(decodedText) {
     return;
   }
 
+
+  const code =
+    decodedText
+      .toString()
+      .replace(/[^0-9]/g, "");
+
+
+  /*
+   * ISBN-13は978または979から始まる
+   *
+   * それ以外のEAN-13は無視する。
+   */
+
+  if (
+    code.length !== 13 ||
+    (!code.startsWith("978") &&
+     !code.startsWith("979"))
+  ) {
+
+    showResult(
+      "🔍 別のバーコードです",
+      "ISBNバーコードを読み取ってください。"
+    );
+
+    return;
+
+  }
+
+
   scanning = false;
 
 
   if (scanner) {
 
     scanner.stop().catch(function(error) {
+
       console.log(error);
+
     });
 
   }
 
 
-  const isbn =
-    decodedText
-      .toString()
-      .replace(/[^0-9]/g, "");
-
-
   showResult(
-    "🔍 読み取り成功！",
-    "ISBN：" + isbn
+    "🔍 ISBN読み取り成功！",
+    "ISBN：" + code
   );
 
 
-  sendISBN(isbn);
+  sendISBN(code);
 
 }
 
+
+/* -------------------------
+   読み取り中のエラー
+------------------------- */
 
 function onScanError(errorMessage) {
+
   // 読み取り中のエラーは無視
+
 }
 
+
+/* -------------------------
+   カメラ開始
+------------------------- */
 
 function startScanner() {
 
   scanning = true;
+
 
   scanner =
     new Html5Qrcode("reader");
@@ -184,7 +252,9 @@ function startScanner() {
     },
 
     formatsToSupport: [
+
       Html5QrcodeSupportedFormats.EAN_13
+
     ]
 
   };
@@ -216,13 +286,19 @@ function startScanner() {
 }
 
 
+/* -------------------------
+   ページ読み込み
+------------------------- */
+
 window.onload = function() {
 
   startScanner();
 
 };
 
+
 </script>
 
 </body>
+
 </html>
