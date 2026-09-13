@@ -10,29 +10,34 @@
 
   <title>MY LIBRARY</title>
 
+  <!-- バーコード読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"
           type="text/javascript"></script>
+
 
   <style>
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
       margin: 0;
-      padding: 24px 16px;
+      padding: 20px;
       background: #f7f7f7;
       color: #333;
     }
+
 
     h1 {
       text-align: center;
       margin: 10px 0 5px;
     }
 
+
     .subtitle {
       text-align: center;
       color: #777;
       margin-bottom: 25px;
     }
+
 
     #reader {
       width: 100%;
@@ -43,26 +48,79 @@
       overflow: hidden;
     }
 
-    #result {
+
+    /* スキャン開始ボタン */
+
+    #startButton {
+
+      display: block;
+
+      width: 100%;
+
       max-width: 500px;
+
       margin: 20px auto;
-      padding: 18px;
-      background: white;
-      border-radius: 16px;
-      display: none;
-      box-sizing: border-box;
+
+      padding: 16px;
+
+      border: none;
+
+      border-radius: 12px;
+
+      font-size: 18px;
+
+      background: #333;
+
+      color: white;
+
     }
+
+
+    #startButton:active {
+
+      background: #555;
+
+    }
+
+
+    /* 読み取り結果 */
+
+    #result {
+
+      max-width: 500px;
+
+      margin: 20px auto;
+
+      padding: 20px;
+
+      background: white;
+
+      border-radius: 16px;
+
+      box-sizing: border-box;
+
+    }
+
+
+    .success {
+
+      font-size: 20px;
+
+      font-weight: bold;
+
+      margin-bottom: 10px;
+
+    }
+
 
     .isbn {
+
       font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 10px;
+
+      color: #555;
+
     }
 
-    .message {
-      font-size: 16px;
-      line-height: 1.6;
-    }
 
   </style>
 
@@ -71,23 +129,41 @@
 
 <body>
 
+
   <h1>📚 MY LIBRARY</h1>
+
 
   <div class="subtitle">
     本のバーコードをスキャン
   </div>
 
 
+  <!-- カメラ表示エリア -->
+
   <div id="reader"></div>
 
 
+  <!-- カメラ起動ボタン -->
+
+  <button id="startButton"
+          onclick="startScanner()">
+
+    📷 スキャン開始
+
+  </button>
+
+
+  <!-- 読み取り結果 -->
+
   <div id="result">
 
-    <div class="isbn">
-      ISBN
+    <div class="success">
+      ✅ 読み取り成功！
     </div>
 
-    <div class="message" id="message">
+    <div class="isbn"
+         id="isbnResult">
+
     </div>
 
   </div>
@@ -95,102 +171,156 @@
 
 <script>
 
+
   let scanner = null;
+
   let scanned = false;
 
 
   function startScanner() {
 
-    scanned = false;
 
+    /* すでに起動していた場合 */
 
     if (scanner) {
 
       try {
+
         scanner.clear();
+
       } catch (e) {
+
       }
 
     }
 
 
-    scanner = new Html5Qrcode("reader");
+    scanned = false;
 
+
+    /* 結果を消す */
+
+    document.getElementById("result").style.display =
+      "none";
+
+
+    /* スキャナー作成 */
+
+    scanner =
+      new Html5Qrcode("reader");
+
+
+    /* バーコード設定 */
 
     const config = {
 
       fps: 10,
 
       qrbox: {
+
         width: 300,
+
         height: 150
+
       },
 
       formatsToSupport: [
+
         Html5QrcodeSupportedFormats.EAN_13
+
       ]
 
     };
 
 
+    /* カメラ起動 */
+
     scanner.start(
 
       {
+
         facingMode: "environment"
+
       },
 
       config,
 
+
+      /* 読み取り成功 */
+
       function(decodedText) {
 
+
         if (scanned) {
+
           return;
+
         }
 
 
         scanned = true;
 
 
+        /* ISBN取得 */
+
         const isbn =
           decodedText.replace(/[^0-9]/g, "");
 
 
-        document.getElementById("result").style.display =
-          "block";
+        /* 結果表示 */
+
+        document.getElementById(
+          "result"
+        ).style.display = "block";
 
 
-        document.getElementById("message").textContent =
-          "読み取り成功！";
-
-
-        document.querySelector(".isbn").textContent =
+        document.getElementById(
+          "isbnResult"
+        ).textContent =
           "ISBN：" + isbn;
 
 
+        /* カメラ停止 */
+
         scanner.stop().catch(function() {});
+
 
       },
 
+
+      /* 読み取り失敗 */
+
       function(errorMessage) {
 
-        // 読み取り失敗は無視
+        /* 何もしない */
 
       }
 
     )
 
+
+    /* カメラ起動エラー */
+
     .catch(function(error) {
 
+
       alert(
+
         "カメラを起動できませんでした。\n\n" +
+
         error
+
       );
+
 
     });
 
+
   }
 
+
 </script>
+
 
 </body>
 
