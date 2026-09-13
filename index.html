@@ -7,354 +7,162 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0">
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>MY LIBRARY</title>
 
-  <script
-    src="https://unpkg.com/html5-qrcode">
-  </script>
-
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
 
     body {
-
-      font-family: sans-serif;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        sans-serif;
 
       text-align: center;
-
-      padding: 20px;
-
-      background: #f7f7f7;
-
       margin: 0;
-
+      padding: 30px 20px;
+      background: #fafafa;
     }
-
 
     h1 {
-
-      margin-bottom: 20px;
-
+      margin-bottom: 10px;
     }
 
+    p {
+      color: #666;
+    }
 
     #reader {
-
       width: 100%;
-
       max-width: 500px;
-
-      margin: 0 auto;
-
-      background: white;
-
+      margin: 30px auto;
     }
 
-
-    #result {
-
-      margin: 20px auto;
-
-      padding: 20px;
-
-      max-width: 500px;
-
-      background: white;
-
-      border-radius: 10px;
-
-      box-sizing: border-box;
-
-    }
-
-
-    #title {
-
-      font-size: 20px;
-
-      font-weight: bold;
-
-      margin-bottom: 10px;
-
-    }
-
-
-    #info {
-
-      line-height: 1.7;
-
-    }
-
-
-    .isbn {
-
+    .message {
+      margin-top: 20px;
       font-size: 16px;
-
-      color: #555;
-
     }
 
   </style>
 
 </head>
 
-
 <body>
 
+  <h1>MY LIBRARY</h1>
 
-<h1>📚 MY LIBRARY</h1>
+  <p>本のバーコードをスキャンしてください</p>
 
+  <div id="reader"></div>
 
-<div id="reader"></div>
-
-
-<div id="result">
-
-  <div id="title">
-    バーコードを読み取ってください
+  <div class="message" id="message">
+    カメラを起動しています…
   </div>
 
-  <div id="info"></div>
 
-</div>
+  <script>
 
+    // --------------------------------
+    // Apps Script WebアプリURL
+    // --------------------------------
 
-
-<script>
-
-
-// =====================================================
-// Apps Script WebアプリURL
-// =====================================================
-
-const API_URL =
-  "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
 
 
-let scanner = null;
+    // --------------------------------
+    // スキャン成功
+    // --------------------------------
 
-let scanning = false;
+    function onScanSuccess(decodedText, decodedResult) {
 
+      const isbn = String(decodedText)
+        .replace(/\D/g, "");
 
-// =====================================================
-// 結果表示
-// =====================================================
+      // ISBN-13のみ受付
+      if (
+        isbn.length !== 13 ||
+        (!isbn.startsWith("978") &&
+         !isbn.startsWith("979"))
+      ) {
 
-function showResult(title, info) {
+        document.getElementById("message").innerText =
+          "ISBNバーコードではありません。";
 
-  document
-    .getElementById("title")
-    .textContent = title;
-
-
-  document
-    .getElementById("info")
-    .innerHTML = info;
-
-}
-
-
-// =====================================================
-// ISBN送信
-// =====================================================
-
-function sendISBN(isbn) {
-
-  showResult(
-
-    "📖 登録しています...",
-
-    "<div class='isbn'>ISBN：" +
-    isbn +
-    "</div><br>" +
-
-    "蔵書データを登録しています。"
-
-  );
+        return;
+      }
 
 
-  // -------------------------------------
-  // GETでApps Scriptへ移動
-  // -------------------------------------
-
-  const url =
-    API_URL +
-    "?code=" +
-    encodeURIComponent(isbn);
+      // 二重読み取り防止
+      html5QrcodeScanner.clear();
 
 
-  window.location.href = url;
-
-}
-
-
-// =====================================================
-// バーコード読み取り成功
-// =====================================================
-
-function onScanSuccess(decodedText) {
-
-  if (!scanning) {
-
-    return;
-
-  }
+      document.getElementById("message").innerText =
+        "処理しています…";
 
 
-  const code =
-    decodedText
-      .toString()
-      .replace(/[^0-9]/g, "");
+      // --------------------------------
+      // 読書履歴として処理
+      // --------------------------------
+
+      const url =
+        API_URL +
+        "?mode=read&code=" +
+        encodeURIComponent(isbn);
 
 
-  // -------------------------------------
-  // ISBN-13以外を除外
-  // -------------------------------------
+      window.location.href = url;
 
-  if (
+    }
 
-    code.length !== 13 ||
 
-    (
-      !code.startsWith("978") &&
-      !code.startsWith("979")
-    )
+    // --------------------------------
+    // スキャンエラー
+    // --------------------------------
 
-  ) {
+    function onScanFailure(error) {
+      // 無視
+    }
 
-    showResult(
 
-      "🔍 別のバーコードです",
+    // --------------------------------
+    // カメラ起動
+    // --------------------------------
 
-      "ISBNバーコードを読み取ってください。"
+    const html5QrcodeScanner =
+      new Html5QrcodeScanner(
 
+        "reader",
+
+        {
+          fps: 10,
+
+          qrbox: {
+            width: 280,
+            height: 120
+          },
+
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13
+          ]
+
+        },
+
+        false
+      );
+
+
+    html5QrcodeScanner.render(
+      onScanSuccess,
+      onScanFailure
     );
 
-    return;
-
-  }
-
-
-  // -------------------------------------
-  // 二重読み取り防止
-  // -------------------------------------
-
-  scanning = false;
-
-
-  if (scanner) {
-
-    scanner
-      .stop()
-      .catch(function(error) {
-
-        console.log(error);
-
-      });
-
-  }
-
-
-  // -------------------------------------
-  // 登録処理
-  // -------------------------------------
-
-  sendISBN(code);
-
-}
-
-
-// =====================================================
-// 読み取りエラー
-// =====================================================
-
-function onScanError(errorMessage) {
-
-  // 読み取り途中のエラーは無視
-
-}
-
-
-// =====================================================
-// カメラ起動
-// =====================================================
-
-function startScanner() {
-
-  scanning = true;
-
-
-  scanner =
-    new Html5Qrcode("reader");
-
-
-  const config = {
-
-    fps: 10,
-
-    qrbox: {
-
-      width: 280,
-
-      height: 150
-
-    },
-
-    formatsToSupport: [
-
-      Html5QrcodeSupportedFormats.EAN_13
-
-    ]
-
-  };
-
-
-  scanner.start(
-
-    {
-
-      facingMode: "environment"
-
-    },
-
-    config,
-
-    onScanSuccess,
-
-    onScanError
-
-  )
-
-  .catch(function(error) {
-
-    showResult(
-
-      "❌ カメラを起動できません",
-
-      error
-
-    );
-
-  });
-
-}
-
-
-// =====================================================
-// 起動
-// =====================================================
-
-window.onload = function() {
-
-  startScanner();
-
-};
-
-
-</script>
-
+  </script>
 
 </body>
 
