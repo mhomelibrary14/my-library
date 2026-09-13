@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 
 <head>
 
   <meta charset="UTF-8">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-
->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>MY LIBRARY</title>
 
@@ -45,14 +43,32 @@ content="width=device-width, initial-scale=1.0"
       margin: 30px auto;
     }
 
+    button {
+      font-size: 18px;
+      padding: 14px 30px;
+      border: none;
+      border-radius: 10px;
+      background: #222;
+      color: white;
+      cursor: pointer;
+    }
+
     .message {
       margin-top: 20px;
       font-size: 16px;
+      color: #555;
+    }
+
+    video {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 12px;
     }
 
   </style>
 
 </head>
+
 
 <body>
 
@@ -62,12 +78,17 @@ content="width=device-width, initial-scale=1.0"
 
   <div id="reader"></div>
 
+  <button id="startButton">
+    カメラを起動
+  </button>
+
   <div
     class="message"
     id="message"
   >
-    カメラを起動しています…
+    「カメラを起動」を押してください
   </div>
+
 
 <script>
 
@@ -80,7 +101,15 @@ content="width=device-width, initial-scale=1.0"
 
 
   // =====================================
-  // スキャン成功
+  // スキャナー
+  // =====================================
+
+  const html5QrCode =
+    new Html5Qrcode("reader");
+
+
+  // =====================================
+  // 読み取り成功
   // =====================================
 
   function onScanSuccess(decodedText, decodedResult) {
@@ -111,11 +140,11 @@ content="width=device-width, initial-scale=1.0"
 
 
     // -------------------------------------
-    // 二重読み取り防止
+    // カメラ停止
     // -------------------------------------
 
-    html5QrcodeScanner
-      .clear()
+    html5QrCode
+      .stop()
       .catch(() => {});
 
 
@@ -123,9 +152,9 @@ content="width=device-width, initial-scale=1.0"
       "処理しています…";
 
 
-    // =====================================
-    // ★ 読書履歴モード
-    // =====================================
+    // -------------------------------------
+    // 読書履歴処理
+    // -------------------------------------
 
     const url =
       API_URL +
@@ -139,12 +168,12 @@ content="width=device-width, initial-scale=1.0"
 
 
   // =====================================
-  // スキャン失敗
+  // 読み取り失敗
   // =====================================
 
   function onScanFailure(error) {
 
-    // スキャン中のエラーは無視
+    // 読み取り中のエラーは無視
 
   }
 
@@ -153,50 +182,74 @@ content="width=device-width, initial-scale=1.0"
   // カメラ起動
   // =====================================
 
-  const html5QrcodeScanner =
-    new Html5QrcodeScanner(
+  document
+    .getElementById("startButton")
+    .addEventListener(
+      "click",
+      function () {
 
-      "reader",
+        document.getElementById("message").innerText =
+          "カメラを起動しています…";
 
-      {
-
-        // 1秒あたり10回スキャン
-        fps: 10,
-
-        // バーコードを読み取る範囲
-        qrbox: {
-          width: 300,
-          height: 150
-        },
 
         // ---------------------------------
-        // カメラのみ使用
-        // 「写真を追加」を表示しない
+        // 背面カメラを指定
         // ---------------------------------
 
-        supportedScanTypes: [
-          Html5QrcodeScanType.SCAN_TYPE_CAMERA
-        ],
+        const cameraConfig = {
+          facingMode: "environment"
+        };
 
-        // 前回使用したカメラを記憶
-        rememberLastUsedCamera: true
 
-      },
+        // ---------------------------------
+        // カメラ開始
+        // ---------------------------------
 
-      false
+        html5QrCode
+          .start(
+            cameraConfig,
 
+            {
+              fps: 10,
+
+              qrbox: {
+                width: 300,
+                height: 150
+              }
+
+            },
+
+            onScanSuccess,
+
+            onScanFailure
+
+          )
+
+          .then(
+            function () {
+
+              document.getElementById("message").innerText =
+                "バーコードをカメラに映してください。";
+
+              document.getElementById("startButton").style.display =
+                "none";
+
+            }
+          )
+
+          .catch(
+            function (error) {
+
+              console.error(error);
+
+              document.getElementById("message").innerText =
+                "カメラを起動できませんでした。iPhoneの設定でカメラの許可を確認してください。";
+
+            }
+          );
+
+      }
     );
-
-
-  // -------------------------------------
-  // スキャナー開始
-  // -------------------------------------
-
-  html5QrcodeScanner.render(
-    onScanSuccess,
-    onScanFailure
-  );
-
 
 </script>
 
