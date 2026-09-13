@@ -45,7 +45,7 @@
     .menu button {
       display: block;
       width: 100%;
-      margin: 20px 0;
+      margin: 18px 0;
       padding: 20px;
       font-size: 18px;
       border: none;
@@ -56,6 +56,10 @@
 
     .menu button.read {
       background: #555;
+    }
+
+    .menu button.finish {
+      background: #777;
     }
 
     #reader {
@@ -95,35 +99,45 @@
 
 <body>
 
-  <h1>MY LIBRARY</h1>
-
 
   <!-- ================================= -->
-  <!-- メニュー画面 -->
+  <!-- メニュー -->
   <!-- ================================= -->
 
-  <div
-    id="menu"
-    class="menu"
-  >
+  <div id="menu">
+
+    <h1>MY LIBRARY</h1>
 
     <p>
       何をしますか？
     </p>
 
-    <button
-      onclick="startBookRegistration()"
-    >
-      📚 蔵書を登録する
-    </button>
+
+    <div class="menu">
+
+      <button
+        onclick="startScanner('register')"
+      >
+        📚 蔵書を登録する
+      </button>
 
 
-    <button
-      class="read"
-      onclick="startReading()"
-    >
-      📖 読書を開始・読了する
-    </button>
+      <button
+        class="read"
+        onclick="startScanner('read_start')"
+      >
+        📖 読書を開始する
+      </button>
+
+
+      <button
+        class="finish"
+        onclick="startScanner('read_finish')"
+      >
+        ✅ 読了にする
+      </button>
+
+    </div>
 
   </div>
 
@@ -141,17 +155,16 @@
       📚 蔵書登録
     </h2>
 
+
     <p id="scannerDescription">
-      本のバーコードをスキャンしてください
+      本のバーコードをスキャンしてください。
     </p>
 
 
     <div id="reader"></div>
 
 
-    <button
-      id="startButton"
-    >
+    <button id="startButton">
       カメラを起動
     </button>
 
@@ -160,7 +173,7 @@
       class="message"
       id="message"
     >
-      「カメラを起動」を押してください
+      「カメラを起動」を押してください。
     </div>
 
 
@@ -178,7 +191,7 @@
 
 
   // =====================================
-  // Apps Script WebアプリURL
+  // Apps Script URL
   // =====================================
 
   const API_URL =
@@ -187,9 +200,6 @@
 
   // =====================================
   // 現在のモード
-  //
-  // register = 蔵書登録
-  // read     = 読書開始・読了
   // =====================================
 
   let currentMode = "";
@@ -203,50 +213,58 @@
 
 
   // =====================================
-  // 蔵書登録モード
+  // スキャンモード開始
   // =====================================
 
-  function startBookRegistration() {
+  function startScanner(mode) {
 
-    currentMode = "register";
+    currentMode = mode;
+
 
     document.getElementById("menu").style.display =
       "none";
 
-    document.getElementById("scannerArea").style.display =
-      "block";
-
-    document.getElementById("scannerTitle").innerText =
-      "📚 蔵書登録";
-
-    document.getElementById("scannerDescription").innerText =
-      "登録したい本のバーコードをスキャンしてください。";
-
-    document.getElementById("message").innerText =
-      "「カメラを起動」を押してください。";
-
-  }
-
-
-  // =====================================
-  // 読書モード
-  // =====================================
-
-  function startReading() {
-
-    currentMode = "read";
-
-    document.getElementById("menu").style.display =
-      "none";
 
     document.getElementById("scannerArea").style.display =
       "block";
 
-    document.getElementById("scannerTitle").innerText =
-      "📖 読書開始・読了";
 
-    document.getElementById("scannerDescription").innerText =
-      "読みたい本のバーコードをスキャンしてください。";
+    // -----------------------------------
+    // 画面表示
+    // -----------------------------------
+
+    if (mode === "register") {
+
+      document.getElementById("scannerTitle").innerText =
+        "📚 蔵書登録";
+
+      document.getElementById("scannerDescription").innerText =
+        "登録したい本のバーコードをスキャンしてください。";
+
+    }
+
+
+    if (mode === "read_start") {
+
+      document.getElementById("scannerTitle").innerText =
+        "📖 読書開始";
+
+      document.getElementById("scannerDescription").innerText =
+        "読み始める本のバーコードをスキャンしてください。";
+
+    }
+
+
+    if (mode === "read_finish") {
+
+      document.getElementById("scannerTitle").innerText =
+        "✅ 読了";
+
+      document.getElementById("scannerDescription").innerText =
+        "読み終わった本のバーコードをスキャンしてください。";
+
+    }
+
 
     document.getElementById("message").innerText =
       "「カメラを起動」を押してください。";
@@ -266,16 +284,22 @@
         .stop()
         .catch(() => {});
 
+      html5QrCode = null;
+
     }
+
 
     document.getElementById("scannerArea").style.display =
       "none";
 
+
     document.getElementById("menu").style.display =
       "block";
 
+
     document.getElementById("startButton").style.display =
       "inline-block";
+
 
     document.getElementById("message").innerText =
       "「カメラを起動」を押してください。";
@@ -295,7 +319,7 @@
 
 
     // -----------------------------------
-    // ISBN-13チェック
+    // ISBN-13確認
     // -----------------------------------
 
     if (
@@ -332,7 +356,7 @@
 
 
     // ===================================
-    // URL作成
+    // URL
     // ===================================
 
     let url =
@@ -342,25 +366,39 @@
 
 
     // -----------------------------------
-    // 読書モードの場合だけ
-    // mode=read を付ける
+    // 読書開始
     // -----------------------------------
 
-    if (currentMode === "read") {
+    if (currentMode === "read_start") {
 
       url =
         API_URL +
-        "?mode=read&code=" +
+        "?mode=read_start&code=" +
+        encodeURIComponent(isbn);
+
+    }
+
+
+    // -----------------------------------
+    // 読了
+    // -----------------------------------
+
+    if (currentMode === "read_finish") {
+
+      url =
+        API_URL +
+        "?mode=read_finish&code=" +
         encodeURIComponent(isbn);
 
     }
 
 
     // ===================================
-    // Apps Scriptへ移動
+    // Apps Scriptへ
     // ===================================
 
-    window.location.href = url;
+    window.location.href =
+      url;
 
   }
 
@@ -390,26 +428,14 @@
           "カメラを起動しています…";
 
 
-        // ---------------------------------
-        // スキャナー作成
-        // ---------------------------------
-
         html5QrCode =
           new Html5Qrcode("reader");
 
-
-        // ---------------------------------
-        // 背面カメラ
-        // ---------------------------------
 
         const cameraConfig = {
           facingMode: "environment"
         };
 
-
-        // ---------------------------------
-        // カメラ開始
-        // ---------------------------------
 
         html5QrCode
           .start(
@@ -417,6 +443,7 @@
             cameraConfig,
 
             {
+
               fps: 10,
 
               qrbox: {
@@ -439,6 +466,7 @@
               document.getElementById("message").innerText =
                 "バーコードをカメラに映してください。";
 
+
               document.getElementById("startButton").style.display =
                 "none";
 
@@ -451,6 +479,7 @@
             function (error) {
 
               console.error(error);
+
 
               document.getElementById("message").innerText =
                 "カメラを起動できませんでした。";
