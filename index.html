@@ -3,243 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>MY LIBRARY</title>
-
-  <script src="https://unpkg.com/html5-qrcode"></script>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-      background: #f7f7f7;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    #reader {
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-      background: white;
-    }
-
-    #result {
-      margin-top: 20px;
-      padding: 20px;
-      background: white;
-      border-radius: 10px;
-    }
-
-    button {
-      font-size: 18px;
-      padding: 12px 24px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 8px;
-      background: #333;
-      color: white;
-    }
-  </style>
+  <title>MY LIBRARY TEST</title>
 </head>
 
 <body>
 
-  <h1>📚 MY LIBRARY</h1>
+<h1>📚 MY LIBRARY 通信テスト</h1>
 
-  <div id="reader"></div>
+<p id="result">通信テスト中...</p>
 
-  <div id="result">
-    <div id="title">バーコードを読み取ってください</div>
-    <div id="info"></div>
-  </div>
+<script>
 
-  <script>
+const API_URL =
+  "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
 
-    // ★ここを自分のApps ScriptのURLに変更
-    const API_URL =
-      "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
+const callbackName = "testCallbackFromGitHub";
 
+window[callbackName] = function(result) {
 
-    let scanner = null;
-    let scanning = false;
+  document.getElementById("result").innerHTML =
+    "✅ 通信成功！<br><br>" +
+    JSON.stringify(result);
 
-
-    function showResult(title, info) {
-      document.getElementById("title").textContent = title;
-      document.getElementById("info").innerHTML = info;
-    }
+  delete window[callbackName];
+};
 
 
-    function sendISBN(isbn) {
+const script = document.createElement("script");
 
-      showResult(
-        "📖 登録しています...",
-        "ISBN：" + isbn
-      );
+script.src =
+  API_URL +
+  "?code=9784065357057" +
+  "&callback=" +
+  callbackName;
 
-      const callbackName =
-        "libraryCallback_" + Date.now();
+script.onerror = function() {
 
+  document.getElementById("result").innerHTML =
+    "❌ 通信失敗<br><br>" +
+    "Apps Script URL：" +
+    API_URL;
+};
 
-      // JSONPのコールバック
-      window[callbackName] = function(result) {
+document.body.appendChild(script);
 
-        // scriptタグを削除
-        const script =
-          document.getElementById(callbackName);
-
-        if (script) {
-          script.remove();
-        }
-
-        // callbackを削除
-        delete window[callbackName];
-
-
-        if (result.success) {
-
-          showResult(
-            "✅ 登録完了！",
-            "ISBN：" + result.isbn +
-            "<br>書籍名：" + result.title +
-            "<br>著者：" + result.author +
-            "<br>出版社：" + result.publisher +
-            "<br><br>📚 蔵書に登録しました！"
-          );
-
-        } else {
-
-          showResult(
-            "⚠️ 登録できませんでした",
-            result.message
-          );
-
-        }
-      };
-
-
-      const url =
-        API_URL +
-        "?code=" +
-        encodeURIComponent(isbn) +
-        "&callback=" +
-        encodeURIComponent(callbackName);
-
-
-      const script =
-        document.createElement("script");
-
-      script.id = callbackName;
-      script.src = url;
-
-
-      script.onerror = function() {
-
-        showResult(
-          "❌ 通信エラー",
-          "Apps Scriptとの通信に失敗しました。<br><br>" +
-          "URL：" + API_URL
-        );
-
-        script.remove();
-        delete window[callbackName];
-      };
-
-
-      document.body.appendChild(script);
-    }
-
-
-    function onScanSuccess(decodedText) {
-
-      if (scanning === false) {
-        return;
-      }
-
-      scanning = false;
-
-
-      // 読み取り停止
-      if (scanner) {
-        scanner.stop().catch(function(error) {
-          console.log(error);
-        });
-      }
-
-
-      const isbn =
-        decodedText
-          .toString()
-          .replace(/[^0-9]/g, "");
-
-
-      showResult(
-        "🔍 読み取り成功！",
-        "ISBN：" + isbn
-      );
-
-
-      // Apps Scriptへ送信
-      sendISBN(isbn);
-    }
-
-
-    function onScanError(errorMessage) {
-      // 読み取り中のエラーは無視
-    }
-
-
-    function startScanner() {
-
-      scanning = true;
-
-      scanner =
-        new Html5Qrcode("reader");
-
-
-      const config = {
-        fps: 10,
-
-        qrbox: {
-          width: 280,
-          height: 150
-        },
-
-        formatsToSupport: [
-          Html5QrcodeSupportedFormats.EAN_13
-        ]
-      };
-
-
-      scanner.start(
-        {
-          facingMode: "environment"
-        },
-        config,
-        onScanSuccess,
-        onScanError
-      )
-      .catch(function(error) {
-
-        showResult(
-          "❌ カメラを起動できません",
-          error
-        );
-
-      });
-    }
-
-
-    // ページを開いたらカメラ開始
-    window.onload = function() {
-      startScanner();
-    };
-
-  </script>
+</script>
 
 </body>
 </html>
