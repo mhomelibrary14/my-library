@@ -5,38 +5,95 @@
 
   <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
 
   <title>MY LIBRARY</title>
 
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script
+    src="https://unpkg.com/html5-qrcode">
+  </script>
+
 
   <style>
 
     body {
+
       font-family: sans-serif;
+
       text-align: center;
+
       padding: 20px;
+
       background: #f7f7f7;
+
+      margin: 0;
+
     }
+
 
     h1 {
+
       margin-bottom: 20px;
+
     }
+
 
     #reader {
+
       width: 100%;
+
       max-width: 500px;
+
       margin: 0 auto;
+
       background: white;
+
     }
 
+
     #result {
-      margin-top: 20px;
+
+      margin: 20px auto;
+
       padding: 20px;
+
+      max-width: 500px;
+
       background: white;
+
       border-radius: 10px;
+
+      box-sizing: border-box;
+
+    }
+
+
+    #title {
+
+      font-size: 20px;
+
+      font-weight: bold;
+
+      margin-bottom: 10px;
+
+    }
+
+
+    #info {
+
+      line-height: 1.7;
+
+    }
+
+
+    .isbn {
+
+      font-size: 16px;
+
+      color: #555;
+
     }
 
   </style>
@@ -45,6 +102,7 @@
 
 
 <body>
+
 
 <h1>📚 MY LIBRARY</h1>
 
@@ -63,31 +121,13 @@
 </div>
 
 
-<!-- Apps Scriptへの送信用 -->
-
-<iframe
-  name="librarySubmit"
-  id="librarySubmit"
-  style="display:none;">
-</iframe>
-
-
-<form
-  id="libraryForm"
-  method="POST"
-  target="librarySubmit"
-  style="display:none;">
-
-  <input
-    type="hidden"
-    name="code"
-    id="isbnInput">
-
-</form>
-
 
 <script>
 
+
+// =====================================================
+// Apps Script WebアプリURL
+// =====================================================
 
 const API_URL =
   "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
@@ -98,70 +138,68 @@ let scanner = null;
 let scanning = false;
 
 
-/* -------------------------
-   画面表示
-------------------------- */
+// =====================================================
+// 結果表示
+// =====================================================
 
 function showResult(title, info) {
 
-  document.getElementById("title").textContent = title;
+  document
+    .getElementById("title")
+    .textContent = title;
 
-  document.getElementById("info").innerHTML = info;
+
+  document
+    .getElementById("info")
+    .innerHTML = info;
 
 }
 
 
-/* -------------------------
-   Apps Scriptへ送信
-------------------------- */
+// =====================================================
+// ISBN送信
+// =====================================================
 
 function sendISBN(isbn) {
 
   showResult(
+
     "📖 登録しています...",
-    "ISBN：" + isbn
+
+    "<div class='isbn'>ISBN：" +
+    isbn +
+    "</div><br>" +
+
+    "蔵書データを登録しています。"
+
   );
 
 
-  document.getElementById("isbnInput").value = isbn;
+  // -------------------------------------
+  // GETでApps Scriptへ移動
+  // -------------------------------------
+
+  const url =
+    API_URL +
+    "?code=" +
+    encodeURIComponent(isbn);
 
 
-  document.getElementById("libraryForm").action =
-    API_URL;
-
-
-  document.getElementById("libraryForm").submit();
-
-
-  /*
-   * フォーム送信はブラウザの標準機能なので、
-   * CORSの影響を受けません。
-   *
-   * 少し待ってから登録完了画面を表示します。
-   */
-
-  setTimeout(function() {
-
-    showResult(
-      "📚 登録処理を実行しました",
-      "ISBN：" + isbn +
-      "<br><br>" +
-      "蔵書シートを確認してください。"
-    );
-
-  }, 1500);
+  window.location.href = url;
 
 }
 
 
-/* -------------------------
-   バーコード読み取り成功
-------------------------- */
+// =====================================================
+// バーコード読み取り成功
+// =====================================================
 
 function onScanSuccess(decodedText) {
 
   if (!scanning) {
+
     return;
+
   }
 
 
@@ -171,21 +209,27 @@ function onScanSuccess(decodedText) {
       .replace(/[^0-9]/g, "");
 
 
-  /*
-   * ISBN-13は978または979から始まる
-   *
-   * それ以外のEAN-13は無視する。
-   */
+  // -------------------------------------
+  // ISBN-13以外を除外
+  // -------------------------------------
 
   if (
+
     code.length !== 13 ||
-    (!code.startsWith("978") &&
-     !code.startsWith("979"))
+
+    (
+      !code.startsWith("978") &&
+      !code.startsWith("979")
+    )
+
   ) {
 
     showResult(
+
       "🔍 別のバーコードです",
+
       "ISBNバーコードを読み取ってください。"
+
     );
 
     return;
@@ -193,45 +237,49 @@ function onScanSuccess(decodedText) {
   }
 
 
+  // -------------------------------------
+  // 二重読み取り防止
+  // -------------------------------------
+
   scanning = false;
 
 
   if (scanner) {
 
-    scanner.stop().catch(function(error) {
+    scanner
+      .stop()
+      .catch(function(error) {
 
-      console.log(error);
+        console.log(error);
 
-    });
+      });
 
   }
 
 
-  showResult(
-    "🔍 ISBN読み取り成功！",
-    "ISBN：" + code
-  );
-
+  // -------------------------------------
+  // 登録処理
+  // -------------------------------------
 
   sendISBN(code);
 
 }
 
 
-/* -------------------------
-   読み取り中のエラー
-------------------------- */
+// =====================================================
+// 読み取りエラー
+// =====================================================
 
 function onScanError(errorMessage) {
 
-  // 読み取り中のエラーは無視
+  // 読み取り途中のエラーは無視
 
 }
 
 
-/* -------------------------
-   カメラ開始
-------------------------- */
+// =====================================================
+// カメラ起動
+// =====================================================
 
 function startScanner() {
 
@@ -247,8 +295,11 @@ function startScanner() {
     fps: 10,
 
     qrbox: {
+
       width: 280,
+
       height: 150
+
     },
 
     formatsToSupport: [
@@ -263,7 +314,9 @@ function startScanner() {
   scanner.start(
 
     {
+
       facingMode: "environment"
+
     },
 
     config,
@@ -277,8 +330,11 @@ function startScanner() {
   .catch(function(error) {
 
     showResult(
+
       "❌ カメラを起動できません",
+
       error
+
     );
 
   });
@@ -286,9 +342,9 @@ function startScanner() {
 }
 
 
-/* -------------------------
-   ページ読み込み
-------------------------- */
+// =====================================================
+// 起動
+// =====================================================
 
 window.onload = function() {
 
@@ -298,6 +354,7 @@ window.onload = function() {
 
 
 </script>
+
 
 </body>
 
