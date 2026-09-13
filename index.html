@@ -52,6 +52,7 @@
 
 </head>
 
+
 <body>
 
   <h1>MY LIBRARY</h1>
@@ -60,109 +61,133 @@
 
   <div id="reader"></div>
 
-  <div class="message" id="message">
+  <div
+    class="message"
+    id="message"
+  >
     カメラを起動しています…
   </div>
 
 
-  <script>
+<script>
 
-    // --------------------------------
-    // Apps Script WebアプリURL
-    // --------------------------------
+  // =====================================
+  // Apps Script Webアプリ
+  // =====================================
 
-    const API_URL =
-      "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
 
 
-    // --------------------------------
-    // スキャン成功
-    // --------------------------------
+  // =====================================
+  // スキャン成功
+  // =====================================
 
-    function onScanSuccess(decodedText, decodedResult) {
+  function onScanSuccess(decodedText, decodedResult) {
 
-      const isbn = String(decodedText)
+    const isbn =
+      String(decodedText)
         .replace(/\D/g, "");
 
-      // ISBN-13のみ受付
-      if (
-        isbn.length !== 13 ||
-        (!isbn.startsWith("978") &&
-         !isbn.startsWith("979"))
-      ) {
 
-        document.getElementById("message").innerText =
-          "ISBNバーコードではありません。";
+    // -------------------------------------
+    // ISBN-13か確認
+    // -------------------------------------
 
-        return;
-      }
-
-
-      // 二重読み取り防止
-      html5QrcodeScanner.clear();
-
+    if (
+      isbn.length !== 13 ||
+      (
+        !isbn.startsWith("978") &&
+        !isbn.startsWith("979")
+      )
+    ) {
 
       document.getElementById("message").innerText =
-        "処理しています…";
+        "ISBNバーコードではありません。";
 
-
-      // --------------------------------
-      // 読書履歴として処理
-      // --------------------------------
-
-     const url =
-  API_URL +
-  "?mode=read&code=" +
-  encodeURIComponent(isbn);
-
-
-      window.location.href = url;
+      return;
 
     }
 
 
-    // --------------------------------
-    // スキャンエラー
-    // --------------------------------
+    // -------------------------------------
+    // 二重読み取り防止
+    // -------------------------------------
 
-    function onScanFailure(error) {
-      // 無視
-    }
+    html5QrcodeScanner
+      .clear()
+      .catch(() => {});
 
 
-    // --------------------------------
-    // カメラ起動
-    // --------------------------------
+    document.getElementById("message").innerText =
+      "処理しています…";
 
-    const html5QrcodeScanner =
-      new Html5QrcodeScanner(
 
-        "reader",
+    // =====================================
+    // ★ここが今回変更したところ
+    // 読書履歴モードでApps Scriptへ送る
+    // =====================================
 
-        {
-          fps: 10,
+    const url =
+      API_URL +
+      "?mode=read&code=" +
+      encodeURIComponent(isbn);
 
-          qrbox: {
-            width: 280,
-            height: 120
-          },
 
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13
-          ]
+    window.location.href = url;
 
+  }
+
+
+  // =====================================
+  // スキャン失敗
+  // =====================================
+
+  function onScanFailure(error) {
+
+    // スキャン中のエラーは無視
+
+  }
+
+
+  // =====================================
+  // カメラ起動
+  // =====================================
+
+  const html5QrcodeScanner =
+    new Html5QrcodeScanner(
+
+      "reader",
+
+      {
+
+        fps: 10,
+
+        qrbox: {
+          width: 280,
+          height: 120
         },
 
-        false
-      );
+        formatsToSupport: [
 
+          Html5QrcodeSupportedFormats.EAN_13
 
-    html5QrcodeScanner.render(
-      onScanSuccess,
-      onScanFailure
+        ]
+
+      },
+
+      false
+
     );
 
-  </script>
+
+  html5QrcodeScanner.render(
+    onScanSuccess,
+    onScanFailure
+  );
+
+
+</script>
 
 </body>
 
