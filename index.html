@@ -25,7 +25,7 @@
 
       text-align: center;
       margin: 0;
-      padding: 30px 20px;
+      padding: 40px 20px;
       background: #fafafa;
     }
 
@@ -37,20 +37,40 @@
       color: #666;
     }
 
+    .menu {
+      max-width: 400px;
+      margin: 40px auto;
+    }
+
+    .menu button {
+      display: block;
+      width: 100%;
+      margin: 20px 0;
+      padding: 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      background: #222;
+      color: white;
+    }
+
+    .menu button.read {
+      background: #555;
+    }
+
     #reader {
       width: 100%;
       max-width: 500px;
       margin: 30px auto;
     }
 
-    button {
+    #startButton {
       font-size: 18px;
       padding: 14px 30px;
       border: none;
       border-radius: 10px;
       background: #222;
       color: white;
-      cursor: pointer;
     }
 
     .message {
@@ -59,10 +79,13 @@
       color: #555;
     }
 
-    video {
-      width: 100%;
-      max-width: 500px;
-      border-radius: 12px;
+    .backButton {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: #ddd;
+      font-size: 16px;
     }
 
   </style>
@@ -74,23 +97,85 @@
 
   <h1>MY LIBRARY</h1>
 
-  <p>本のバーコードをスキャンしてください</p>
 
-  <div id="reader"></div>
-
-  <button id="startButton">
-    カメラを起動
-  </button>
+  <!-- ================================= -->
+  <!-- メニュー画面 -->
+  <!-- ================================= -->
 
   <div
-    class="message"
-    id="message"
+    id="menu"
+    class="menu"
   >
-    「カメラを起動」を押してください
+
+    <p>
+      何をしますか？
+    </p>
+
+    <button
+      onclick="startBookRegistration()"
+    >
+      📚 蔵書を登録する
+    </button>
+
+
+    <button
+      class="read"
+      onclick="startReading()"
+    >
+      📖 読書を開始・読了する
+    </button>
+
+  </div>
+
+
+  <!-- ================================= -->
+  <!-- スキャン画面 -->
+  <!-- ================================= -->
+
+  <div
+    id="scannerArea"
+    style="display:none;"
+  >
+
+    <h2 id="scannerTitle">
+      📚 蔵書登録
+    </h2>
+
+    <p id="scannerDescription">
+      本のバーコードをスキャンしてください
+    </p>
+
+
+    <div id="reader"></div>
+
+
+    <button
+      id="startButton"
+    >
+      カメラを起動
+    </button>
+
+
+    <div
+      class="message"
+      id="message"
+    >
+      「カメラを起動」を押してください
+    </div>
+
+
+    <button
+      class="backButton"
+      onclick="backToMenu()"
+    >
+      ← 戻る
+    </button>
+
   </div>
 
 
 <script>
+
 
   // =====================================
   // Apps Script WebアプリURL
@@ -101,15 +186,105 @@
 
 
   // =====================================
+  // 現在のモード
+  //
+  // register = 蔵書登録
+  // read     = 読書開始・読了
+  // =====================================
+
+  let currentMode = "";
+
+
+  // =====================================
   // スキャナー
   // =====================================
 
-  const html5QrCode =
-    new Html5Qrcode("reader");
+  let html5QrCode = null;
 
 
   // =====================================
-  // 読み取り成功
+  // 蔵書登録モード
+  // =====================================
+
+  function startBookRegistration() {
+
+    currentMode = "register";
+
+    document.getElementById("menu").style.display =
+      "none";
+
+    document.getElementById("scannerArea").style.display =
+      "block";
+
+    document.getElementById("scannerTitle").innerText =
+      "📚 蔵書登録";
+
+    document.getElementById("scannerDescription").innerText =
+      "登録したい本のバーコードをスキャンしてください。";
+
+    document.getElementById("message").innerText =
+      "「カメラを起動」を押してください。";
+
+  }
+
+
+  // =====================================
+  // 読書モード
+  // =====================================
+
+  function startReading() {
+
+    currentMode = "read";
+
+    document.getElementById("menu").style.display =
+      "none";
+
+    document.getElementById("scannerArea").style.display =
+      "block";
+
+    document.getElementById("scannerTitle").innerText =
+      "📖 読書開始・読了";
+
+    document.getElementById("scannerDescription").innerText =
+      "読みたい本のバーコードをスキャンしてください。";
+
+    document.getElementById("message").innerText =
+      "「カメラを起動」を押してください。";
+
+  }
+
+
+  // =====================================
+  // メニューに戻る
+  // =====================================
+
+  function backToMenu() {
+
+    if (html5QrCode) {
+
+      html5QrCode
+        .stop()
+        .catch(() => {});
+
+    }
+
+    document.getElementById("scannerArea").style.display =
+      "none";
+
+    document.getElementById("menu").style.display =
+      "block";
+
+    document.getElementById("startButton").style.display =
+      "inline-block";
+
+    document.getElementById("message").innerText =
+      "「カメラを起動」を押してください。";
+
+  }
+
+
+  // =====================================
+  // スキャン成功
   // =====================================
 
   function onScanSuccess(decodedText, decodedResult) {
@@ -119,9 +294,9 @@
         .replace(/\D/g, "");
 
 
-    // -------------------------------------
-    // ISBN-13か確認
-    // -------------------------------------
+    // -----------------------------------
+    // ISBN-13チェック
+    // -----------------------------------
 
     if (
       isbn.length !== 13 ||
@@ -139,28 +314,51 @@
     }
 
 
-    // -------------------------------------
+    // -----------------------------------
     // カメラ停止
-    // -------------------------------------
+    // -----------------------------------
 
-    html5QrCode
-      .stop()
-      .catch(() => {});
+    if (html5QrCode) {
+
+      html5QrCode
+        .stop()
+        .catch(() => {});
+
+    }
 
 
     document.getElementById("message").innerText =
       "処理しています…";
 
 
-    // -------------------------------------
-    // 読書履歴処理
-    // -------------------------------------
+    // ===================================
+    // URL作成
+    // ===================================
 
-    const url =
+    let url =
       API_URL +
-      "?mode=read&code=" +
+      "?code=" +
       encodeURIComponent(isbn);
 
+
+    // -----------------------------------
+    // 読書モードの場合だけ
+    // mode=read を付ける
+    // -----------------------------------
+
+    if (currentMode === "read") {
+
+      url =
+        API_URL +
+        "?mode=read&code=" +
+        encodeURIComponent(isbn);
+
+    }
+
+
+    // ===================================
+    // Apps Scriptへ移動
+    // ===================================
 
     window.location.href = url;
 
@@ -168,7 +366,7 @@
 
 
   // =====================================
-  // 読み取り失敗
+  // スキャン失敗
   // =====================================
 
   function onScanFailure(error) {
@@ -193,7 +391,15 @@
 
 
         // ---------------------------------
-        // 背面カメラを指定
+        // スキャナー作成
+        // ---------------------------------
+
+        html5QrCode =
+          new Html5Qrcode("reader");
+
+
+        // ---------------------------------
+        // 背面カメラ
         // ---------------------------------
 
         const cameraConfig = {
@@ -207,6 +413,7 @@
 
         html5QrCode
           .start(
+
             cameraConfig,
 
             {
@@ -226,6 +433,7 @@
           )
 
           .then(
+
             function () {
 
               document.getElementById("message").innerText =
@@ -235,21 +443,26 @@
                 "none";
 
             }
+
           )
 
           .catch(
+
             function (error) {
 
               console.error(error);
 
               document.getElementById("message").innerText =
-                "カメラを起動できませんでした。iPhoneの設定でカメラの許可を確認してください。";
+                "カメラを起動できませんでした。";
 
             }
+
           );
 
       }
+
     );
+
 
 </script>
 
