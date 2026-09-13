@@ -13,6 +13,7 @@
   <script src="https://unpkg.com/html5-qrcode"
           type="text/javascript"></script>
 
+
   <style>
 
     body {
@@ -94,23 +95,16 @@
   <div id="reader"></div>
 
 
-  <button id="startButton"
-          onclick="startScanner()">
-
+  <button onclick="startScanner()">
     📷 スキャン開始
-
   </button>
 
 
   <div id="result">
 
-    <div class="title"
-         id="title">
-    </div>
+    <div class="title" id="title"></div>
 
-    <div class="info"
-         id="info">
-    </div>
+    <div class="info" id="info"></div>
 
   </div>
 
@@ -119,7 +113,7 @@
 
 
   // =====================================
-  // Apps ScriptのURL
+  // Apps Script URL
   // =====================================
 
   const API_URL =
@@ -137,19 +131,14 @@
 
   function startScanner() {
 
-
     scanned = false;
 
 
     if (scanner) {
 
       try {
-
         scanner.clear();
-
-      } catch (e) {
-
-      }
+      } catch (e) {}
 
     }
 
@@ -167,17 +156,12 @@
       fps: 10,
 
       qrbox: {
-
         width: 300,
-
         height: 150
-
       },
 
       formatsToSupport: [
-
         Html5QrcodeSupportedFormats.EAN_13
-
       ]
 
     };
@@ -192,17 +176,11 @@
       config,
 
 
-      // =================================
-      // バーコード読み取り成功
-      // =================================
-
       function(decodedText) {
 
 
         if (scanned) {
-
           return;
-
         }
 
 
@@ -213,14 +191,10 @@
           decodedText.replace(/[^0-9]/g, "");
 
 
-        // カメラ停止
-
         scanner.stop().catch(function() {});
 
 
-        // 登録処理開始
-
-        sendISBN(isbn);
+        registerBook(isbn);
 
       },
 
@@ -248,9 +222,10 @@
 
   // =====================================
   // Apps ScriptへISBN送信
+  // JSONP方式
   // =====================================
 
-  function sendISBN(isbn) {
+  function registerBook(isbn) {
 
 
     document.getElementById("result")
@@ -258,42 +233,43 @@
 
 
     document.getElementById("title")
-      .textContent = "⏳ 書籍情報を取得しています";
+      .textContent =
+      "⏳ 書籍情報を取得しています";
 
 
     document.getElementById("info")
       .textContent =
-        "ISBN：" + isbn;
+      "ISBN：" + isbn;
 
 
-    fetch(API_URL, {
+    // JSONP用のコールバック名
 
-      method: "POST",
-
-      headers: {
-
-        "Content-Type": "text/plain;charset=utf-8"
-
-      },
-
-      body: JSON.stringify({
-
-        code: isbn
-
-      })
-
-    })
+    const callbackName =
+      "libraryCallback_" + Date.now();
 
 
-    .then(function(response) {
+    // コールバック関数
 
-      return response.json();
-
-    })
+    window[callbackName] = function(result) {
 
 
-    .then(function(result) {
+      // スクリプトタグ削除
 
+      const script =
+        document.getElementById(callbackName);
+
+
+      if (script) {
+        script.remove();
+      }
+
+
+      // コールバック削除
+
+      delete window[callbackName];
+
+
+      // 結果表示
 
       if (result.success) {
 
@@ -335,23 +311,52 @@
 
       }
 
-    })
+    };
 
 
-    .catch(function(error) {
+    // Apps Script URL
 
+    const url =
+      API_URL +
+
+      "?code=" +
+      encodeURIComponent(isbn) +
+
+      "&callback=" +
+      encodeURIComponent(callbackName);
+
+
+    // scriptタグを作成
+
+    const script =
+      document.createElement("script");
+
+
+    script.id = callbackName;
+
+    script.src = url;
+
+
+    // 通信エラー
+
+    script.onerror = function() {
 
       document.getElementById("title")
         .textContent =
         "❌ 通信エラー";
 
-
       document.getElementById("info")
         .textContent =
-        error.toString();
+        "Apps Scriptとの通信に失敗しました。";
+
+      script.remove();
+
+      delete window[callbackName];
+
+    };
 
 
-    });
+    document.body.appendChild(script);
 
   }
 
