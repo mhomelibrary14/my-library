@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MY LIBRARY TEST</title>
+  <title>MY LIBRARY 通信テスト</title>
 </head>
 
 <body>
 
-<h1>📚 MY LIBRARY 通信テスト</h1>
+<h1>📚 MY LIBRARY</h1>
 
 <p id="result">通信テスト中...</p>
 
@@ -17,16 +17,14 @@
 const API_URL =
   "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
 
-const callbackName = "testCallbackFromGitHub";
 
-window[callbackName] = function(result) {
+function testCallback(result) {
 
   document.getElementById("result").innerHTML =
     "✅ 通信成功！<br><br>" +
     JSON.stringify(result);
 
-  delete window[callbackName];
-};
+}
 
 
 const script = document.createElement("script");
@@ -34,15 +32,14 @@ const script = document.createElement("script");
 script.src =
   API_URL +
   "?code=9784065357057" +
-  "&callback=" +
-  callbackName;
+  "&callback=testCallback";
 
 script.onerror = function() {
 
   document.getElementById("result").innerHTML =
     "❌ 通信失敗<br><br>" +
-    "Apps Script URL：" +
-    API_URL;
+    "Apps ScriptからJavaScriptを読み込めませんでした。";
+
 };
 
 document.body.appendChild(script);
