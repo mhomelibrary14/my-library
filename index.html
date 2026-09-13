@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <title>MY LIBRARY</title>
+
+  <script src="https://unpkg.com/html5-qrcode"
+          type="text/javascript"></script>
+
+  <style>
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      margin: 0;
+      padding: 24px 16px;
+      background: #f7f7f7;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 10px 0 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    #result {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 18px;
+      background: white;
+      border-radius: 16px;
+      display: none;
+      box-sizing: border-box;
+    }
+
+    .isbn {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .message {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <h1>📚 MY LIBRARY</h1>
+
+  <div class="subtitle">
+    本のバーコードをスキャン
+  </div>
+
+
+  <div id="reader"></div>
+
+
+  <div id="result">
+
+    <div class="isbn">
+      ISBN
+    </div>
+
+    <div class="message" id="message">
+    </div>
+
+  </div>
+
+
+<script>
+
+  let scanner = null;
+  let scanned = false;
+
+
+  function startScanner() {
+
+    scanned = false;
+
+
+    if (scanner) {
+
+      try {
+        scanner.clear();
+      } catch (e) {
+      }
+
+    }
+
+
+    scanner = new Html5Qrcode("reader");
+
+
+    const config = {
+
+      fps: 10,
+
+      qrbox: {
+        width: 300,
+        height: 150
+      },
+
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13
+      ]
+
+    };
+
+
+    scanner.start(
+
+      {
+        facingMode: "environment"
+      },
+
+      config,
+
+      function(decodedText) {
+
+        if (scanned) {
+          return;
+        }
+
+
+        scanned = true;
+
+
+        const isbn =
+          decodedText.replace(/[^0-9]/g, "");
+
+
+        document.getElementById("result").style.display =
+          "block";
+
+
+        document.getElementById("message").textContent =
+          "読み取り成功！";
+
+
+        document.querySelector(".isbn").textContent =
+          "ISBN：" + isbn;
+
+
+        scanner.stop().catch(function() {});
+
+      },
+
+      function(errorMessage) {
+
+        // 読み取り失敗は無視
+
+      }
+
+    )
+
+    .catch(function(error) {
+
+      alert(
+        "カメラを起動できませんでした。\n\n" +
+        error
+      );
+
+    });
+
+  }
+
+</script>
+
+</body>
+
+</html>
