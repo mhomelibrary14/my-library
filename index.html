@@ -1,14 +1,16 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 
 <head>
 
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+>
 
   <title>MY LIBRARY</title>
 
@@ -52,7 +54,6 @@
 
 </head>
 
-
 <body>
 
   <h1>MY LIBRARY</h1>
@@ -68,11 +69,10 @@
     カメラを起動しています…
   </div>
 
-
 <script>
 
   // =====================================
-  // Apps Script Webアプリ
+  // Apps Script WebアプリURL
   // =====================================
 
   const API_URL =
@@ -124,8 +124,7 @@
 
 
     // =====================================
-    // ★ここが今回変更したところ
-    // 読書履歴モードでApps Scriptへ送る
+    // ★ 読書履歴モード
     // =====================================
 
     const url =
@@ -161,18 +160,26 @@
 
       {
 
+        // 1秒あたり10回スキャン
         fps: 10,
 
+        // バーコードを読み取る範囲
         qrbox: {
-          width: 280,
-          height: 120
+          width: 300,
+          height: 150
         },
 
-        formatsToSupport: [
+        // ---------------------------------
+        // カメラのみ使用
+        // 「写真を追加」を表示しない
+        // ---------------------------------
 
-          Html5QrcodeSupportedFormats.EAN_13
+        supportedScanTypes: [
+          Html5QrcodeScanType.SCAN_TYPE_CAMERA
+        ],
 
-        ]
+        // 前回使用したカメラを記憶
+        rememberLastUsedCamera: true
 
       },
 
@@ -180,6 +187,10 @@
 
     );
 
+
+  // -------------------------------------
+  // スキャナー開始
+  // -------------------------------------
 
   html5QrcodeScanner.render(
     onScanSuccess,
