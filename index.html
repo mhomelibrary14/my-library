@@ -2,6 +2,7 @@
 <html lang="ja">
 
 <head>
+
   <meta charset="UTF-8">
 
   <meta name="viewport"
@@ -9,8 +10,9 @@
 
   <title>MY LIBRARY</title>
 
-  <script src="https://unpkg.com/html5-qrcode"
-          type="text/javascript">
+  <script
+    src="https://unpkg.com/html5-qrcode"
+    type="text/javascript">
   </script>
 
   <style>
@@ -97,24 +99,34 @@
       📚 蔵書を登録する
     </button>
 
+
     <button onclick="startScanner('read_start')">
       📖 読書を開始する
     </button>
+
 
     <button onclick="startScanner('read_finish')">
       ✅ 読了にする
     </button>
 
+
     <button onclick="startScanner('wishlist_add')">
       ❤️ 読みたい本に追加する
     </button>
+
 
     <button onclick="openWishlist()">
       📋 読みたい本を見る
     </button>
 
+
     <button onclick="openSearch()">
       🔎 蔵書を検索する
+    </button>
+
+
+    <button onclick="openBookshelf()">
+      📚 表紙の本棚を見る
     </button>
 
   </div>
@@ -126,9 +138,13 @@
 
     <div id="reader"></div>
 
-    <button class="back-button"
-            onclick="stopScanner()">
+
+    <button
+      class="back-button"
+      onclick="stopScanner()">
+
       ← 戻る
+
     </button>
 
   </div>
@@ -143,8 +159,11 @@
 
 
   let html5QrCode = null;
+
   let currentMode = "";
+
   let scanning = false;
+
 
 
   /* =========================
@@ -155,11 +174,18 @@
 
     currentMode = mode;
 
-    document.querySelector(".menu").style.display = "none";
 
-    document.getElementById("scannerArea").style.display = "block";
+    document.querySelector(".menu")
+      .style.display = "none";
 
-    html5QrCode = new Html5Qrcode("reader");
+
+    document.getElementById("scannerArea")
+      .style.display = "block";
+
+
+    html5QrCode =
+      new Html5Qrcode("reader");
+
 
     html5QrCode.start(
 
@@ -167,6 +193,7 @@
 
       {
         fps: 10,
+
         qrbox: {
           width: 280,
           height: 160
@@ -177,11 +204,15 @@
 
       onScanFailure
 
-    ).then(function() {
+    )
+
+    .then(function() {
 
       scanning = true;
 
-    }).catch(function(error) {
+    })
+
+    .catch(function(error) {
 
       alert(
         "カメラを起動できませんでした。\n\n" +
@@ -195,29 +226,37 @@
   }
 
 
+
   /* =========================
      バーコード読み取り成功
   ========================= */
 
-  function onScanSuccess(decodedText, decodedResult) {
+  function onScanSuccess(
+    decodedText,
+    decodedResult
+  ) {
 
     if (!scanning) return;
 
+
     scanning = false;
+
 
     let code =
       String(decodedText)
         .replace(/[^\d]/g, "");
 
-    /*
-     * ISBN-13のみ受付
-     * 978 / 979から始まる13桁
-     */
 
     if (
+
       code.length !== 13 ||
-      !(code.startsWith("978") ||
-        code.startsWith("979"))
+
+      !(
+        code.startsWith("978") ||
+
+        code.startsWith("979")
+      )
+
     ) {
 
       alert(
@@ -225,7 +264,9 @@
         "本の裏表紙にあるバーコードを読み取ってください。"
       );
 
+
       scanning = true;
+
 
       return;
     }
@@ -237,6 +278,9 @@
     let url = GAS_URL;
 
 
+
+    /* 蔵書登録 */
+
     if (currentMode === "register") {
 
       url +=
@@ -246,7 +290,12 @@
     }
 
 
-    else if (currentMode === "read_start") {
+
+    /* 読書開始 */
+
+    else if (
+      currentMode === "read_start"
+    ) {
 
       url +=
         "?mode=read_start&code=" +
@@ -255,7 +304,12 @@
     }
 
 
-    else if (currentMode === "read_finish") {
+
+    /* 読了 */
+
+    else if (
+      currentMode === "read_finish"
+    ) {
 
       url +=
         "?mode=read_finish&code=" +
@@ -264,7 +318,12 @@
     }
 
 
-    else if (currentMode === "wishlist_add") {
+
+    /* 読みたい本 */
+
+    else if (
+      currentMode === "wishlist_add"
+    ) {
 
       url +=
         "?mode=wishlist_add&code=" +
@@ -278,6 +337,7 @@
   }
 
 
+
   /* =========================
      読み取り失敗
   ========================= */
@@ -289,6 +349,7 @@
   }
 
 
+
   /* =========================
      スキャナー停止
   ========================= */
@@ -297,24 +358,37 @@
 
     scanning = false;
 
+
     if (html5QrCode) {
 
-      html5QrCode.stop()
+      html5QrCode
+        .stop()
+
         .then(function() {
 
           html5QrCode.clear();
 
         })
+
         .catch(function() {});
 
+
       html5QrCode = null;
+
     }
 
-    document.getElementById("scannerArea").style.display = "none";
 
-    document.querySelector(".menu").style.display = "grid";
+    document.getElementById(
+      "scannerArea"
+    ).style.display = "none";
+
+
+    document.querySelector(
+      ".menu"
+    ).style.display = "grid";
 
   }
+
 
 
   /* =========================
@@ -327,9 +401,11 @@
       GAS_URL +
       "?mode=wishlist";
 
+
     window.location.href = url;
 
   }
+
 
 
   /* =========================
@@ -354,6 +430,23 @@
       GAS_URL +
       "?mode=search&keyword=" +
       encodeURIComponent(keyword);
+
+
+    window.location.href = url;
+
+  }
+
+
+
+  /* =========================
+     表紙の本棚
+  ========================= */
+
+  function openBookshelf() {
+
+    const url =
+      GAS_URL +
+      "?mode=bookshelf";
 
 
     window.location.href = url;
