@@ -3,96 +3,191 @@
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-  <title>MY LIBRARY</title>
+<title>MY LIBRARY</title>
 
-  <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://unpkg.com/html5-qrcode"
+crossorigin="anonymous"></script>
 
-  <style>
+<style>
 
-    body {
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Helvetica Neue",
-        sans-serif;
+* {
+  box-sizing: border-box;
+}
 
-      text-align: center;
-      margin: 0;
-      padding: 40px 20px;
-      background: #fafafa;
-    }
+body {
 
-    h1 {
-      margin-bottom: 10px;
-    }
+  margin: 0;
 
-    p {
-      color: #666;
-    }
+  padding: 30px 20px;
 
-    .menu {
-      max-width: 400px;
-      margin: 40px auto;
-    }
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
 
-    .menu button {
-      display: block;
-      width: 100%;
-      margin: 18px 0;
-      padding: 20px;
-      font-size: 18px;
-      border: none;
-      border-radius: 12px;
-      background: #222;
-      color: white;
-    }
+  background: #f7f7f7;
 
-    .menu button.read {
-      background: #555;
-    }
+  color: #333;
+}
 
-    .menu button.finish {
-      background: #777;
-    }
+.container {
 
-    #reader {
-      width: 100%;
-      max-width: 500px;
-      margin: 30px auto;
-    }
+  max-width: 500px;
 
-    #startButton {
-      font-size: 18px;
-      padding: 14px 30px;
-      border: none;
-      border-radius: 10px;
-      background: #222;
-      color: white;
-    }
+  margin: 0 auto;
 
-    .message {
-      margin-top: 20px;
-      font-size: 16px;
-      color: #555;
-    }
+  text-align: center;
+}
 
-    .backButton {
-      margin-top: 20px;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      background: #ddd;
-      font-size: 16px;
-    }
+h1 {
 
-  </style>
+  font-size: 30px;
+
+  margin: 10px 0 5px;
+}
+
+.subtitle {
+
+  color: #777;
+
+  font-size: 14px;
+
+  margin-bottom: 30px;
+}
+
+
+/* メニュー */
+
+.menu {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+
+.menu button {
+
+  width: 100%;
+
+  padding: 18px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: white;
+
+  box-shadow:
+    0 3px 12px rgba(0,0,0,0.08);
+
+  font-size: 17px;
+
+  font-weight: bold;
+
+  color: #333;
+
+  cursor: pointer;
+}
+
+
+.menu button:active {
+
+  transform: scale(0.98);
+}
+
+
+/* 検索ボタン */
+
+.search-button {
+
+  margin-top: 12px;
+
+  background: #333 !important;
+
+  color: white !important;
+}
+
+
+/* スキャナー */
+
+#scanner-section {
+
+  display: none;
+}
+
+
+#reader {
+
+  width: 100%;
+
+  margin: 20px auto;
+
+  background: #000;
+
+  border-radius: 15px;
+
+  overflow: hidden;
+}
+
+
+.scanner-title {
+
+  font-size: 20px;
+
+  font-weight: bold;
+
+  margin-bottom: 10px;
+}
+
+
+.scanner-message {
+
+  color: #777;
+
+  font-size: 14px;
+
+  margin-bottom: 20px;
+}
+
+
+/* 戻る */
+
+.back-button {
+
+  width: 100%;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #ddd;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  margin-top: 10px;
+}
+
+
+.hidden {
+
+  display: none;
+}
+
+</style>
 
 </head>
 
@@ -100,400 +195,422 @@
 <body>
 
 
-  <!-- ================================= -->
-  <!-- メニュー -->
-  <!-- ================================= -->
-
-  <div id="menu">
-
-    <h1>MY LIBRARY</h1>
-
-    <p>
-      何をしますか？
-    </p>
+<div class="container">
 
 
-    <div class="menu">
+<!-- =========================
+     メニュー
+========================= -->
 
-      <button
-        onclick="startScanner('register')"
-      >
-        📚 蔵書を登録する
-      </button>
+<div id="menu">
 
 
-      <button
-        class="read"
-        onclick="startScanner('read_start')"
-      >
-        📖 読書を開始する
-      </button>
+<h1>📚 MY LIBRARY</h1>
+
+<div class="subtitle">
+
+あなたの本を管理する図書館
+
+</div>
 
 
-      <button
-        class="finish"
-        onclick="startScanner('read_finish')"
-      >
-        ✅ 読了にする
-      </button>
-
-    </div>
-
-  </div>
+<div class="menu">
 
 
-  <!-- ================================= -->
-  <!-- スキャン画面 -->
-  <!-- ================================= -->
+<button onclick="startScanner('register')">
 
-  <div
-    id="scannerArea"
-    style="display:none;"
-  >
+📚 蔵書を登録する
 
-    <h2 id="scannerTitle">
-      📚 蔵書登録
-    </h2>
+</button>
 
 
-    <p id="scannerDescription">
-      本のバーコードをスキャンしてください。
-    </p>
+<button onclick="startScanner('read_start')">
+
+📖 読書を開始する
+
+</button>
 
 
-    <div id="reader"></div>
+<button onclick="startScanner('read_finish')">
+
+✅ 読了にする
+
+</button>
 
 
-    <button id="startButton">
-      カメラを起動
-    </button>
+<button
+class="search-button"
+onclick="openSearch()">
+
+🔎 蔵書を検索する
+
+</button>
 
 
-    <div
-      class="message"
-      id="message"
-    >
-      「カメラを起動」を押してください。
-    </div>
+</div>
 
 
-    <button
-      class="backButton"
-      onclick="backToMenu()"
-    >
-      ← 戻る
-    </button>
+</div>
 
-  </div>
+
+
+<!-- =========================
+     スキャナー
+========================= -->
+
+<div id="scanner-section">
+
+
+<div class="scanner-title"
+id="scanner-title">
+
+バーコードをスキャン
+
+</div>
+
+
+<div class="scanner-message">
+
+本の裏面にあるISBNバーコードを
+カメラに映してください
+
+</div>
+
+
+<div id="reader"></div>
+
+
+<button
+class="back-button"
+onclick="backToMenu()">
+
+← メニューに戻る
+
+</button>
+
+
+</div>
+
+
+</div>
+
 
 
 <script>
 
 
-  // =====================================
-  // Apps Script URL
-  // =====================================
+/************************************************
+ * Apps Script URL
+ ************************************************/
 
-  const API_URL =
-    "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
+const GAS_URL =
+"https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
 
 
-  // =====================================
-  // 現在のモード
-  // =====================================
+/************************************************
+ * 現在のモード
+ ************************************************/
 
-  let currentMode = "";
+let currentMode = "register";
 
 
-  // =====================================
-  // スキャナー
-  // =====================================
+/************************************************
+ * スキャナー
+ ************************************************/
 
-  let html5QrCode = null;
+let html5QrCode = null;
 
 
-  // =====================================
-  // スキャンモード開始
-  // =====================================
+/************************************************
+ * スキャナー開始
+ ************************************************/
 
-  function startScanner(mode) {
+async function startScanner(mode) {
 
-    currentMode = mode;
+  currentMode = mode;
 
-
-    document.getElementById("menu").style.display =
-      "none";
-
-
-    document.getElementById("scannerArea").style.display =
-      "block";
-
-
-    // -----------------------------------
-    // 画面表示
-    // -----------------------------------
-
-    if (mode === "register") {
-
-      document.getElementById("scannerTitle").innerText =
-        "📚 蔵書登録";
-
-      document.getElementById("scannerDescription").innerText =
-        "登録したい本のバーコードをスキャンしてください。";
-
-    }
-
-
-    if (mode === "read_start") {
-
-      document.getElementById("scannerTitle").innerText =
-        "📖 読書開始";
-
-      document.getElementById("scannerDescription").innerText =
-        "読み始める本のバーコードをスキャンしてください。";
-
-    }
-
-
-    if (mode === "read_finish") {
-
-      document.getElementById("scannerTitle").innerText =
-        "✅ 読了";
-
-      document.getElementById("scannerDescription").innerText =
-        "読み終わった本のバーコードをスキャンしてください。";
-
-    }
-
-
-    document.getElementById("message").innerText =
-      "「カメラを起動」を押してください。";
-
-  }
-
-
-  // =====================================
-  // メニューに戻る
-  // =====================================
-
-  function backToMenu() {
-
-    if (html5QrCode) {
-
-      html5QrCode
-        .stop()
-        .catch(() => {});
-
-      html5QrCode = null;
-
-    }
-
-
-    document.getElementById("scannerArea").style.display =
-      "none";
-
-
-    document.getElementById("menu").style.display =
-      "block";
-
-
-    document.getElementById("startButton").style.display =
-      "inline-block";
-
-
-    document.getElementById("message").innerText =
-      "「カメラを起動」を押してください。";
-
-  }
-
-
-  // =====================================
-  // スキャン成功
-  // =====================================
-
-  function onScanSuccess(decodedText, decodedResult) {
-
-    const isbn =
-      String(decodedText)
-        .replace(/\D/g, "");
-
-
-    // -----------------------------------
-    // ISBN-13確認
-    // -----------------------------------
-
-    if (
-      isbn.length !== 13 ||
-      (
-        !isbn.startsWith("978") &&
-        !isbn.startsWith("979")
-      )
-    ) {
-
-      document.getElementById("message").innerText =
-        "ISBNバーコードではありません。";
-
-      return;
-
-    }
-
-
-    // -----------------------------------
-    // カメラ停止
-    // -----------------------------------
-
-    if (html5QrCode) {
-
-      html5QrCode
-        .stop()
-        .catch(() => {});
-
-    }
-
-
-    document.getElementById("message").innerText =
-      "処理しています…";
-
-
-    // ===================================
-    // URL
-    // ===================================
-
-    let url =
-      API_URL +
-      "?code=" +
-      encodeURIComponent(isbn);
-
-
-    // -----------------------------------
-    // 読書開始
-    // -----------------------------------
-
-    if (currentMode === "read_start") {
-
-      url =
-        API_URL +
-        "?mode=read_start&code=" +
-        encodeURIComponent(isbn);
-
-    }
-
-
-    // -----------------------------------
-    // 読了
-    // -----------------------------------
-
-    if (currentMode === "read_finish") {
-
-      url =
-        API_URL +
-        "?mode=read_finish&code=" +
-        encodeURIComponent(isbn);
-
-    }
-
-
-    // ===================================
-    // Apps Scriptへ
-    // ===================================
-
-    window.location.href =
-      url;
-
-  }
-
-
-  // =====================================
-  // スキャン失敗
-  // =====================================
-
-  function onScanFailure(error) {
-
-    // 読み取り中のエラーは無視
-
-  }
-
-
-  // =====================================
-  // カメラ起動
-  // =====================================
 
   document
-    .getElementById("startButton")
-    .addEventListener(
-      "click",
-      function () {
-
-        document.getElementById("message").innerText =
-          "カメラを起動しています…";
+    .getElementById("menu")
+    .style.display = "none";
 
 
-        html5QrCode =
-          new Html5Qrcode("reader");
+  document
+    .getElementById("scanner-section")
+    .style.display = "block";
 
 
-        const cameraConfig = {
-          facingMode: "environment"
-        };
+  const title =
+    document.getElementById("scanner-title");
 
 
-        html5QrCode
-          .start(
+  if (mode === "register") {
 
-            cameraConfig,
+    title.textContent =
+      "📚 蔵書を登録する";
 
-            {
-
-              fps: 10,
-
-              qrbox: {
-                width: 300,
-                height: 150
-              }
-
-            },
-
-            onScanSuccess,
-
-            onScanFailure
-
-          )
-
-          .then(
-
-            function () {
-
-              document.getElementById("message").innerText =
-                "バーコードをカメラに映してください。";
+  }
 
 
-              document.getElementById("startButton").style.display =
-                "none";
+  if (mode === "read_start") {
 
-            }
+    title.textContent =
+      "📖 読書を開始する";
 
-          )
-
-          .catch(
-
-            function (error) {
-
-              console.error(error);
+  }
 
 
-              document.getElementById("message").innerText =
-                "カメラを起動できませんでした。";
+  if (mode === "read_finish") {
 
-            }
+    title.textContent =
+      "✅ 読了にする";
 
-          );
+  }
 
-      }
+
+  /**********************************************
+   * 既存スキャナー停止
+   **********************************************/
+
+  if (html5QrCode) {
+
+    try {
+
+      await html5QrCode.stop();
+
+    } catch (e) {
+
+      console.log(e);
+
+    }
+
+    html5QrCode = null;
+  }
+
+
+  /**********************************************
+   * 新しいスキャナー
+   **********************************************/
+
+  html5QrCode =
+    new Html5Qrcode("reader");
+
+
+  const config = {
+
+    fps: 10,
+
+    qrbox: {
+      width: 280,
+      height: 160
+    }
+
+  };
+
+
+  try {
+
+    await html5QrCode.start(
+
+      {
+        facingMode: "environment"
+      },
+
+      config,
+
+      onScanSuccess
 
     );
 
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "カメラを起動できませんでした。\n\n" +
+      "ブラウザのカメラ許可を確認してください。"
+    );
+
+  }
+
+}
+
+
+/************************************************
+ * スキャン成功
+ ************************************************/
+
+async function onScanSuccess(decodedText) {
+
+  console.log(
+    "読み取り結果:",
+    decodedText
+  );
+
+
+  /**********************************************
+   * ISBNだけを抽出
+   **********************************************/
+
+  const code =
+    String(decodedText)
+      .replace(/\D/g, "");
+
+
+  /**********************************************
+   * ISBN-13のみ受付
+   **********************************************/
+
+  if (
+    code.length !== 13 ||
+    (
+      !code.startsWith("978") &&
+      !code.startsWith("979")
+    )
+  ) {
+
+    console.log(
+      "ISBNではないため無視:",
+      code
+    );
+
+    return;
+  }
+
+
+  /**********************************************
+   * 二重読み取り防止
+   **********************************************/
+
+  try {
+
+    await html5QrCode.stop();
+
+  } catch (e) {
+
+    console.log(e);
+
+  }
+
+
+  html5QrCode = null;
+
+
+  /**********************************************
+   * Apps Scriptへ送信
+   **********************************************/
+
+  let url = GAS_URL;
+
+
+  if (currentMode === "register") {
+
+    url +=
+      "?code=" +
+      encodeURIComponent(code);
+
+  }
+
+
+  if (currentMode === "read_start") {
+
+    url +=
+      "?mode=read_start&code=" +
+      encodeURIComponent(code);
+
+  }
+
+
+  if (currentMode === "read_finish") {
+
+    url +=
+      "?mode=read_finish&code=" +
+      encodeURIComponent(code);
+
+  }
+
+
+  console.log(
+    "アクセス先:",
+    url
+  );
+
+
+  window.location.href = url;
+
+}
+
+
+/************************************************
+ * メニューへ戻る
+ ************************************************/
+
+async function backToMenu() {
+
+  if (html5QrCode) {
+
+    try {
+
+      await html5QrCode.stop();
+
+    } catch (e) {
+
+      console.log(e);
+
+    }
+
+    html5QrCode = null;
+  }
+
+
+  document
+    .getElementById("scanner-section")
+    .style.display = "none";
+
+
+  document
+    .getElementById("menu")
+    .style.display = "block";
+
+
+  document
+    .getElementById("reader")
+    .innerHTML = "";
+
+}
+
+
+/************************************************
+ * 蔵書検索
+ ************************************************/
+
+function openSearch() {
+
+  const keyword =
+    prompt(
+      "検索したい本のタイトル・著者・ISBNを入力してください。\n\n" +
+      "何も入力せずOKを押すと、すべての蔵書を表示します。"
+    );
+
+
+  if (keyword === null) {
+
+    return;
+  }
+
+
+  const url =
+    GAS_URL +
+    "?mode=search&keyword=" +
+    encodeURIComponent(keyword);
+
+
+  window.location.href = url;
+
+}
 
 </script>
+
 
 </body>
 
