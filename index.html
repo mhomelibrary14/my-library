@@ -1,460 +1,839 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-
   <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>MY LIBRARY</title>
 
-  <script
-    src="https://unpkg.com/html5-qrcode"
-    type="text/javascript">
-  </script>
-
   <style>
 
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
-      background: #f7f5f0;
       margin: 0;
-      padding: 30px 20px;
-      color: #333;
+      background: #f7f5f0;
+      color: #3f3a34;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Hiragino Kaku Gothic ProN",
+        "Hiragino Sans",
+        "Yu Gothic",
+        "Meiryo",
+        sans-serif;
     }
 
     .container {
-      max-width: 500px;
-      margin: auto;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 28px 18px 50px;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-    }
+    /* =========================
+       HEADER
+    ========================= */
 
-    .subtitle {
+    .header {
       text-align: center;
-      color: #777;
       margin-bottom: 30px;
     }
 
-    .menu {
-      display: grid;
-      gap: 14px;
+    .logo {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 30px;
+      letter-spacing: 3px;
+      color: #332e29;
+      margin-bottom: 7px;
     }
 
-    button {
+    .subtitle {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #8b8177;
+    }
+
+
+    /* =========================
+       SECTION
+    ========================= */
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 4px 10px;
+    }
+
+    .section-icon {
+      font-size: 17px;
+    }
+
+    .section-name {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #554d45;
+    }
+
+    .section-description {
+      font-size: 11px;
+      color: #9a9188;
+      margin-left: 29px;
+      margin-top: -6px;
+      margin-bottom: 10px;
+    }
+
+
+    /* =========================
+       BUTTON CARD
+    ========================= */
+
+    .menu-card {
+      display: flex;
+      align-items: center;
       width: 100%;
-      padding: 18px;
-      border: none;
-      border-radius: 14px;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      font-size: 16px;
-      cursor: pointer;
+      min-height: 70px;
+
+      background: #ffffff;
+
+      border: 1px solid #ebe6df;
+      border-radius: 15px;
+
+      margin-bottom: 9px;
+      padding: 12px 16px;
+
+      text-decoration: none;
+      color: inherit;
+
+      box-shadow:
+        0 2px 8px rgba(70, 60, 50, 0.04);
+
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
     }
 
-    button:active {
+    .menu-card:active {
       transform: scale(0.98);
+      box-shadow:
+        0 1px 4px rgba(70, 60, 50, 0.03);
     }
 
-    .reader-area {
-      margin-top: 25px;
-      background: white;
-      padding: 15px;
-      border-radius: 14px;
+
+    /* =========================
+       ICON
+    ========================= */
+
+    .menu-icon {
+      width: 44px;
+      height: 44px;
+
+      border-radius: 13px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 21px;
+
+      flex-shrink: 0;
+
+      margin-right: 13px;
     }
 
-    #reader {
-      width: 100%;
+    .icon-library {
+      background: #eee8df;
     }
 
-    .back-button {
-      margin-top: 15px;
-      background: #eee;
+    .icon-reading {
+      background: #e8eee9;
+    }
+
+    .icon-wishlist {
+      background: #f2e7e7;
+    }
+
+    .icon-search {
+      background: #e8edf2;
+    }
+
+
+    /* =========================
+       TEXT
+    ========================= */
+
+    .menu-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .menu-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #403a34;
+      margin-bottom: 4px;
+    }
+
+    .menu-description {
+      font-size: 11px;
+      color: #999087;
+      line-height: 1.5;
+    }
+
+    .arrow {
+      font-size: 20px;
+      color: #c3bbb2;
+      margin-left: 10px;
+      font-weight: 300;
+    }
+
+
+    /* =========================
+       SPECIAL BUTTON
+    ========================= */
+
+    .primary-card {
+      border-color: #ddd4ca;
+    }
+
+    .primary-card .menu-title {
+      color: #342e28;
+    }
+
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    .footer {
+      text-align: center;
+      margin-top: 34px;
+      color: #b1a9a1;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+    }
+
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 400px) {
+
+      .container {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .logo {
+        font-size: 27px;
+      }
+
+      .menu-card {
+        min-height: 66px;
+        padding: 10px 13px;
+      }
+
+      .menu-icon {
+        width: 41px;
+        height: 41px;
+        margin-right: 11px;
+      }
+
+      .menu-title {
+        font-size: 13px;
+      }
+
+      .menu-description {
+        font-size: 10px;
+      }
     }
 
   </style>
-
 </head>
 
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <h1>📚 MY LIBRARY</h1>
+    <!-- HEADER -->
+    <header class="header">
 
-  <div class="subtitle">
-    My Home Library
+      <div class="logo">
+        MY LIBRARY
+      </div>
+
+      <div class="subtitle">
+        BOOKS · READING · RECORD
+      </div>
+
+    </header>
+
+
+    <!-- =========================
+         本を管理する
+    ========================= -->
+
+    <section class="section">
+
+      <div class="section-title">
+        <span class="section-icon">📚</span>
+        <span class="section-name">本を管理する</span>
+      </div>
+
+      <div class="section-description">
+        あなたの本をMY LIBRARYに登録
+      </div>
+
+
+      <a
+        class="menu-card primary-card"
+        href="#"
+        onclick="startScanner('register'); return false;"
+      >
+
+        <div class="menu-icon icon-library">
+          📚
+        </div>
+
+        <div class="menu-text">
+
+          <div class="menu-title">
+            蔵書を登録する
+          </div>
+
+          <div class="menu-description">
+            本のバーコードを読み取って登録
+          </div>
+
+        </div>
+
+        <div class="arrow">
+          ›
+        </div>
+
+      </a>
+
+    </section>
+
+
+    <!-- =========================
+         読書を記録する
+    ========================= -->
+
+    <section class="section">
+
+      <div class="section-title">
+        <span class="section-icon">📖</span>
+        <span class="section-name">読書を記録する</span>
+      </div>
+
+      <div class="section-description">
+        読み始め・読了を記録
+      </div>
+
+
+      <a
+        class="menu-card"
+        href="#"
+        onclick="startScanner('read_start'); return false;"
+      >
+
+        <div class="menu-icon icon-reading">
+          ▶️
+        </div>
+
+        <div class="menu-text">
+
+          <div class="menu-title">
+            読書を開始する
+          </div>
+
+          <div class="menu-description">
+            読み始めた本を記録
+          </div>
+
+        </div>
+
+        <div class="arrow">
+          ›
+        </div>
+
+      </a>
+
+
+      <a
+        class="menu-card"
+        href="#"
+        onclick="startScanner('read_finish'); return false;"
+      >
+
+        <div class="menu-icon icon-reading">
+          ✅
+        </div>
+
+        <div class="menu-text">
+
+          <div class="menu-title">
+            読了にする
+          </div>
+
+          <div class="menu-description">
+            読み終わった本を記録
+          </div>
+
+        </div>
+
+        <div class="arrow">
+          ›
+        </div>
+
+      </a>
+
+    </section>
+
+
+    <!-- =========================
+         読みたい本
+    ========================= -->
+
+    <section class="section">
+
+      <div class="section-title">
+        <span class="section-icon">❤️</span>
+        <span class="section-name">読みたい本</span>
+      </div>
+
+      <div class="section-description">
+        気になる本をストック
+      </div>
+
+
+      <a
+        class="menu-card"
+        href="#"
+        onclick="startScanner('wishlist_add'); return false;"
+      >
+
+        <div class="menu-icon icon-wishlist">
+          ❤️
+        </div>
+
+        <div class="menu-text">
+
+          <div class="menu-title">
+            読みたい本に追加する
+          </div>
+
+          <div class="menu-description">
+            気になる本をリストに保存
+          </div>
+
+        </div>
+
+        <div class="arrow">
+          ›
+        </div>
+
+      </a>
+
+
+      <a
+        class="menu-card"
+        href="#"
+        onclick="openWishlist(); return false;"
+      >
+
+        <div class="menu-icon icon-wishlist">
+          📋
+        </div>
+
+        <div class="menu-text">
+
+          <div class="menu-title">
+            読みたい本を見る
+          </div>
+
+          <div class="menu-description">
+            保存した本のリストを確認
+          </div>
+
+        </div>
+
+        <div class="arrow">
+          ›
+        </div>
+
+      </a>
+
+    </section>
+
+
+    <!-- =========================
+         探す
+    ========================= -->
+
+    <section class="section">
+
+      <div class="section-title">
+        <span class="section-icon">🔎</span>
+        <span class="section-name">探す</span>
+      </div>
+
+      <div class="section-description">
+        MY LIBRARYの本を検索
+      </div>
+
+
+      <a
+        class="menu-card"
+        href="#"
+        onclick="openSearch(); return false;"
+      >
+
+        <div class="menu-icon icon-search">
+          🔎
+        </div>
+
+        <div class="menu-text">
+
+          <div class="menu-title">
+            蔵書を検索する
+          </div>
+
+          <div class="menu-description">
+            タイトル・著者・ISBNから検索
+          </div>
+
+        </div>
+
+        <div class="arrow">
+          ›
+        </div>
+
+      </a>
+
+    </section>
+
+
+    <div class="footer">
+      MY LIBRARY
+    </div>
+
   </div>
 
 
-  <div class="menu">
+  <!-- =========================
+       SCANNER
+  ========================= -->
 
-    <button onclick="startScanner('register')">
-      📚 蔵書を登録する
-    </button>
+  <div
+    id="scanner-area"
+    style="
+      display:none;
+      position:fixed;
+      inset:0;
+      background:#000;
+      z-index:9999;
+    "
+  >
+
+    <div
+      style="
+        position:absolute;
+        top:0;
+        left:0;
+        right:0;
+        padding:18px;
+        color:white;
+        text-align:center;
+        background:rgba(0,0,0,0.45);
+        z-index:2;
+      "
+    >
+      <div style="font-size:16px; font-weight:bold;">
+        本のバーコードを読み取ってください
+      </div>
+
+      <div
+        style="
+          font-size:11px;
+          margin-top:5px;
+          opacity:0.8;
+        "
+      >
+        ISBNバーコードをカメラに映してください
+      </div>
+    </div>
 
 
-    <button onclick="startScanner('read_start')">
-      📖 読書を開始する
-    </button>
-
-
-    <button onclick="startScanner('read_finish')">
-      ✅ 読了にする
-    </button>
-
-
-    <button onclick="startScanner('wishlist_add')">
-      ❤️ 読みたい本に追加する
-    </button>
-
-
-    <button onclick="openWishlist()">
-      📋 読みたい本を見る
-    </button>
-
-
-    <button onclick="openSearch()">
-      🔎 蔵書を検索する
-    </button>
-
-
-    <button onclick="openBookshelf()">
-      📚 表紙の本棚を見る
-    </button>
-
-  </div>
-
-
-  <div id="scannerArea"
-       class="reader-area"
-       style="display:none;">
-
-    <div id="reader"></div>
+    <div
+      id="reader"
+      style="
+        width:100%;
+        height:100%;
+      "
+    ></div>
 
 
     <button
-      class="back-button"
-      onclick="stopScanner()">
+      onclick="stopScanner();"
+      style="
+        position:absolute;
+        bottom:30px;
+        left:50%;
+        transform:translateX(-50%);
 
-      ← 戻る
+        border:none;
+        background:white;
+        color:#403a34;
 
+        padding:13px 30px;
+        border-radius:30px;
+
+        font-size:14px;
+        font-weight:bold;
+
+        box-shadow:0 4px 15px rgba(0,0,0,0.3);
+
+        z-index:3;
+      "
+    >
+      キャンセル
     </button>
 
   </div>
 
-</div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
 
-<script>
+  <script>
 
-  const GAS_URL =
-    "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
-
-
-  let html5QrCode = null;
-
-  let currentMode = "";
-
-  let scanning = false;
+    const GAS_URL =
+      "https://script.google.com/macros/s/AKfycby97RNFKErbRjwLSsmUhkgzwhFO1PxgFWnIBn8CAtv3bq79HKy2ly71bX-6Wa8J48ZOWw/exec";
 
 
-
-  /* =========================
-     スキャナー開始
-  ========================= */
-
-  function startScanner(mode) {
-
-    currentMode = mode;
+    let html5QrCode = null;
+    let currentMode = null;
 
 
-    document.querySelector(".menu")
-      .style.display = "none";
+    /* =========================
+       SCANNER START
+    ========================= */
+
+    function startScanner(mode) {
+
+      currentMode = mode;
+
+      const area =
+        document.getElementById("scanner-area");
+
+      area.style.display = "block";
+
+      html5QrCode =
+        new Html5Qrcode("reader");
 
 
-    document.getElementById("scannerArea")
-      .style.display = "block";
+      html5QrCode
+        .start(
+          {
+            facingMode: "environment"
+          },
+          {
+            fps: 10,
+            qrbox: {
+              width: 280,
+              height: 160
+            }
+          },
+          onScanSuccess,
+          onScanFailure
+        )
+        .catch(function(error) {
+
+          alert(
+            "カメラを起動できませんでした。\n\n" +
+            "ブラウザのカメラ使用許可を確認してください。"
+          );
+
+          stopScanner();
+
+        });
+
+    }
 
 
-    html5QrCode =
-      new Html5Qrcode("reader");
+    /* =========================
+       SCAN SUCCESS
+    ========================= */
+
+    function onScanSuccess(decodedText) {
+
+      let code =
+        decodedText.replace(/\D/g, "");
 
 
-    html5QrCode.start(
+      /*
+       * ISBN-13のみ受付
+       */
 
-      { facingMode: "environment" },
+      if (
+        code.length !== 13 ||
+        (!code.startsWith("978") &&
+         !code.startsWith("979"))
+      ) {
 
-      {
-        fps: 10,
+        return;
 
-        qrbox: {
-          width: 280,
-          height: 160
-        }
-      },
+      }
 
-      onScanSuccess,
 
-      onScanFailure
-
-    )
-
-    .then(function() {
-
-      scanning = true;
-
-    })
-
-    .catch(function(error) {
-
-      alert(
-        "カメラを起動できませんでした。\n\n" +
-        "ブラウザのカメラ許可を確認してください。"
-      );
+      /*
+       * 連続読み取り防止
+       */
 
       stopScanner();
 
-    });
 
-  }
-
+      let url = GAS_URL;
 
 
-  /* =========================
-     バーコード読み取り成功
-  ========================= */
+      if (currentMode === "register") {
 
-  function onScanSuccess(
-    decodedText,
-    decodedResult
-  ) {
+        url +=
+          "?code=" +
+          encodeURIComponent(code);
 
-    if (!scanning) return;
+      }
 
+      else if (currentMode === "read_start") {
 
-    scanning = false;
+        url +=
+          "?mode=read_start&code=" +
+          encodeURIComponent(code);
 
+      }
 
-    let code =
-      String(decodedText)
-        .replace(/[^\d]/g, "");
+      else if (currentMode === "read_finish") {
 
+        url +=
+          "?mode=read_finish&code=" +
+          encodeURIComponent(code);
 
-    if (
+      }
 
-      code.length !== 13 ||
+      else if (currentMode === "wishlist_add") {
 
-      !(
-        code.startsWith("978") ||
+        url +=
+          "?mode=wishlist_add&code=" +
+          encodeURIComponent(code);
 
-        code.startsWith("979")
-      )
-
-    ) {
-
-      alert(
-        "ISBN-13のバーコードではありません。\n\n" +
-        "本の裏表紙にあるバーコードを読み取ってください。"
-      );
+      }
 
 
-      scanning = true;
-
-
-      return;
-    }
-
-
-    stopScanner();
-
-
-    let url = GAS_URL;
-
-
-
-    /* 蔵書登録 */
-
-    if (currentMode === "register") {
-
-      url +=
-        "?code=" +
-        encodeURIComponent(code);
+      window.location.href = url;
 
     }
 
 
+    function onScanFailure(error) {
+      // 読み取り失敗時は何もしない
+    }
 
-    /* 読書開始 */
 
-    else if (
-      currentMode === "read_start"
-    ) {
+    /* =========================
+       SCANNER STOP
+    ========================= */
 
-      url +=
-        "?mode=read_start&code=" +
-        encodeURIComponent(code);
+    function stopScanner() {
+
+      const area =
+        document.getElementById("scanner-area");
+
+      area.style.display = "none";
+
+
+      if (html5QrCode) {
+
+        html5QrCode
+          .stop()
+          .then(function() {
+
+            html5QrCode.clear();
+            html5QrCode = null;
+
+          })
+          .catch(function() {
+
+            html5QrCode = null;
+
+          });
+
+      }
 
     }
 
 
+    /* =========================
+       WISHLIST
+    ========================= */
 
-    /* 読了 */
+    function openWishlist() {
 
-    else if (
-      currentMode === "read_finish"
-    ) {
+      const url =
+        GAS_URL +
+        "?mode=wishlist";
 
-      url +=
-        "?mode=read_finish&code=" +
-        encodeURIComponent(code);
-
-    }
-
-
-
-    /* 読みたい本 */
-
-    else if (
-      currentMode === "wishlist_add"
-    ) {
-
-      url +=
-        "?mode=wishlist_add&code=" +
-        encodeURIComponent(code);
+      window.location.href = url;
 
     }
 
 
-    window.location.href = url;
+    /* =========================
+       SEARCH
+    ========================= */
 
-  }
+    function openSearch() {
 
-
-
-  /* =========================
-     読み取り失敗
-  ========================= */
-
-  function onScanFailure(error) {
-
-    // 読み取り途中のエラーなので何もしない
-
-  }
+      const keyword =
+        prompt(
+          "検索したい本のタイトル・著者・ISBNを入力してください。\n\n" +
+          "何も入力せずOKを押すと、すべての蔵書を表示します。"
+        );
 
 
+      if (keyword === null) {
 
-  /* =========================
-     スキャナー停止
-  ========================= */
+        return;
 
-  function stopScanner() {
-
-    scanning = false;
+      }
 
 
-    if (html5QrCode) {
-
-      html5QrCode
-        .stop()
-
-        .then(function() {
-
-          html5QrCode.clear();
-
-        })
-
-        .catch(function() {});
+      const url =
+        GAS_URL +
+        "?mode=search&keyword=" +
+        encodeURIComponent(keyword);
 
 
-      html5QrCode = null;
+      window.location.href = url;
 
     }
 
-
-    document.getElementById(
-      "scannerArea"
-    ).style.display = "none";
-
-
-    document.querySelector(
-      ".menu"
-    ).style.display = "grid";
-
-  }
-
-
-
-  /* =========================
-     読みたい本リスト
-  ========================= */
-
-  function openWishlist() {
-
-    const url =
-      GAS_URL +
-      "?mode=wishlist";
-
-
-    window.location.href = url;
-
-  }
-
-
-
-  /* =========================
-     蔵書検索
-  ========================= */
-
-  function openSearch() {
-
-    const keyword = prompt(
-
-      "検索したい本のタイトル・著者・ISBNを入力してください。\n\n" +
-
-      "何も入力せずOKを押すと、すべての蔵書を表示します。"
-
-    );
-
-
-    if (keyword === null) return;
-
-
-    const url =
-      GAS_URL +
-      "?mode=search&keyword=" +
-      encodeURIComponent(keyword);
-
-
-    window.location.href = url;
-
-  }
-
-
-
-  /* =========================
-     表紙の本棚
-  ========================= */
-
-  function openBookshelf() {
-
-    const url =
-      GAS_URL +
-      "?mode=bookshelf";
-
-
-    window.location.href = url;
-
-  }
-
-</script>
+  </script>
 
 </body>
-
 </html>
